@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#4A235A">
+<title>Gustavo Sweet & more - POS System</title>
+<link rel="manifest" href="manifest.json">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+    :root {
+        --primary: #4A235A;
+        --accent: #F1C40F;
+        --dark: #2C3E50;
+        --light: #ECF0F1;
+        --danger: #E74C3C;
+        --success: #2ECC71;
+        --warning: #D4AC0D;
+        --panel: #1a1a1a;
+        --card: #2d2d2d;
+        --border: #404040;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff; display: flex; height: 100vh; overflow: hidden; }
+    
+    /* Offline banner */
+    #offlineBanner { display: none; position: fixed; top: 0; left: 0; right: 0; background: var(--danger); color: #fff; text-align: center; font-size: 12px; font-weight: bold; padding: 6px; z-index: 3000; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+    #offlineBanner.show { display: block; }
+    
+    /* Sidebar */
+    .sidebar { width: 280px; background: var(--primary); display: flex; flex-direction: column; border-left: 4px solid var(--accent); padding: 20px; box-shadow: 4px 0 15px rgba(0,0,0,0.3); }
+    .logo-area { text-align: center; margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; }
+    .logo-area h1 { font-size: 24px; color: var(--accent); margin-bottom: 5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+    .logo-area p { font-size: 12px; letter-spacing: 1px; color: #ddd; }
+    .zones { display: flex; gap: 8px; margin-bottom: 20px; }
+    .zone-btn { flex: 1; padding: 12px; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); color: #fff; cursor: pointer; border-radius: 8px; font-weight: bold; transition: all 0.3s; font-size: 13px; }
+    .zone-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+    .zone-btn.active { background: var(--accent); color: var(--primary); border-color: var(--accent); box-shadow: 0 4px 12px rgba(241,196,15,0.4); }
+    .zone-config { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #ddd; margin-bottom: 12px; padding: 10px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+    .zone-config input { width: 60px; padding: 6px; border-radius: 6px; border: none; text-align: center; background: #333; color: #fff; }
+    .sidebar-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; padding: 12px; border-radius: 8px; cursor: pointer; font-size: 13px; margin-bottom: 10px; text-align: right; transition: all 0.2s; display: flex; align-items: center; gap: 10px; }
+    .sidebar-btn:hover { background: rgba(255,255,255,0.18); transform: translateX(-3px); }
+    .sidebar-btn.danger { background: rgba(231,76,60,0.2); border-color: var(--danger); }
+    .sidebar-btn.danger:hover { background: rgba(231,76,60,0.3); }
+    .sidebar-footer { margin-top: auto; font-size: 11px; color: #999; text-align: center; padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
+    
+    /* Main tables area */
+    .main-content { flex: 1; padding: 25px; overflow-y: auto; background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%); }
+    .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; }
+    #zone-title { color: var(--accent); font-size: 22px; font-weight: bold; }
+    .legend { display: flex; gap: 20px; font-size: 13px; color: #ccc; }
+    .legend span { display: flex; align-items: center; gap: 8px; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    .tables-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 16px; }
+    .table-card { background: var(--card); border: 2px solid var(--border); border-radius: 12px; min-height: 110px; display: flex; flex-direction: column; justify-content: center; align-items: center; cursor: pointer; transition: all 0.3s; position: relative; padding: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .table-card:hover { border-color: var(--accent); transform: translateY(-5px); box-shadow: 0 8px 20px rgba(241,196,15,0.2); }
+    .table-card.occupied { background: linear-gradient(135deg, #5c2a1f 0%, #7a3a2a 100%); border-color: var(--danger); }
+    .table-card.selected { outline: 4px solid var(--accent); outline-offset: 3px; box-shadow: 0 0 25px rgba(241,196,15,0.5); }
+    .table-num { font-size: 22px; font-weight: bold; margin-bottom: 5px; }
+    .table-status { font-size: 11px; margin-top: 5px; color: #bbb; }
+    .table-amount { font-size: 13px; margin-top: 5px; color: var(--accent); font-weight: bold; }
+    .table-timer { font-size: 10px; color: #ddd; margin-top: 3px; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 10px; }
+    .new-ticket-card { border: 3px dashed var(--accent); background: rgba(241,196,15,0.1); color: var(--accent); font-weight: bold; font-size: 14px; }
+    .new-ticket-card:hover { background: rgba(241,196,15,0.2); }
+    
+    /* Order panel */
+    .order-panel { width: 420px; background: var(--panel); border-right: 3px solid var(--border); display: flex; flex-direction: column; padding: 20px; box-shadow: -4px 0 15px rgba(0,0,0,0.3); }
+    .panel-header { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid var(--border); }
+    #selected-table-title { font-size: 18px; color: var(--accent); font-weight: bold; }
+    .takeaway-fields { display: none; margin-top: 12px; }
+    .takeaway-fields.active { display: block; animation: slideDown 0.3s ease; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    .takeaway-fields input { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 8px; border: 1px solid var(--border); background: #2d2d2d; color: #fff; font-size: 13px; }
+    .takeaway-fields input:focus { outline: none; border-color: var(--accent); }
+    
+    .search-box { margin: 12px 0; }
+    .search-box input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #2d2d2d; color: #fff; font-size: 14px; }
+    .search-box input:focus { outline: none; border-color: var(--accent); }
+    
+    .category-tabs { display: flex; gap: 8px; overflow-x: auto; margin: 12px 0; padding-bottom: 6px; scrollbar-width: none; }
+    .category-tabs::-webkit-scrollbar { display: none; }
+    .category-tab { flex: 0 0 auto; border: 2px solid var(--border); background: var(--card); color: #ccc; border-radius: 20px; padding: 8px 16px; font-size: 13px; font-weight: bold; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+    .category-tab:hover { border-color: var(--accent); }
+    .category-tab.active { background: var(--accent); color: var(--primary); border-color: var(--accent); box-shadow: 0 3px 10px rgba(241,196,15,0.3); }
+    
+    .menu-selector { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 12px 0; max-height: 180px; overflow-y: auto; padding: 5px; }
+    .menu-item-btn { background: linear-gradient(135deg, #3a3a3a 0%, #2d2d2d 100%); border: 2px solid var(--border); color: #fff; padding: 12px 8px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: center; line-height: 1.3; position: relative; transition: all 0.2s; }
+    .menu-item-btn:hover { background: linear-gradient(135deg, var(--accent) 0%, #f39c12 100%); color: var(--primary); border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(241,196,15,0.3); }
+    .menu-item-btn .extras-flag { position: absolute; top: 5px; left: 8px; font-size: 12px; }
+    .custom-item-btn { grid-column: span 2; background: rgba(241,196,15,0.15); border: 2px dashed var(--accent); color: var(--accent); }
+    .empty-menu-note { grid-column: span 2; color: #777; text-align: center; font-size: 13px; padding: 15px; }
+    
+    .order-items { flex: 1; overflow-y: auto; margin: 15px 0; border-top: 2px solid var(--border); border-bottom: 2px solid var(--border); padding: 12px 0; min-height: 100px; background: rgba(0,0,0,0.2); border-radius: 8px; }
+    .item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13px; gap: 8px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px; transition: all 0.2s; }
+    .item-row:hover { background: rgba(255,255,255,0.1); }
+    .item-name { flex: 1; }
+    .item-name small { display: block; color: #999; font-size: 11px; margin-top: 2px; }
+    .qty-controls { display: flex; align-items: center; gap: 6px; }
+    .qty-controls button { width: 26px; height: 26px; border-radius: 6px; border: none; background: var(--danger); color: #fff; cursor: pointer; font-weight: bold; transition: all 0.2s; }
+    .qty-controls button:hover { background: #c0392b; transform: scale(1.1); }
+    .qty-controls button.plus { background: var(--success); }
+    .qty-controls button.plus:hover { background: #27ae60; }
+    .item-sub { width: 80px; text-align: left; font-weight: bold; color: var(--accent); }
+    .remove-btn { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 18px; transition: all 0.2s; }
+    .remove-btn:hover { transform: scale(1.2); }
+    .empty-cart { color: #777; text-align: center; margin-top: 30px; font-size: 14px; }
+    
+    .total-row { display: flex; justify-content: space-between; font-size: 22px; font-weight: bold; margin: 15px 0; padding: 15px; background: linear-gradient(135deg, rgba(241,196,15,0.2) 0%, rgba(241,196,15,0.05) 100%); border-radius: 10px; border: 2px solid var(--accent); }
+    .action-btn { padding: 14px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; border: none; transition: all 0.3s; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .action-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
+    .print-btn { background: linear-gradient(135deg, #566573 0%, #34495e 100%); color: white; }
+    .checkout-btn { background: linear-gradient(135deg, var(--success) 0%, #27ae60 100%); color: white; }
+    .qr-btn { background: linear-gradient(135deg, var(--warning) 0%, #f39c12 100%); color: #000; }
+    .wa-btn { background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); color: #fff; }
+    .kitchen-btn { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: #fff; }
+    .action-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    
+    /* Modals */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; padding: 20px; backdrop-filter: blur(5px); }
+    .modal-overlay.open { display: flex; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal-content { background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%); padding: 30px; border-radius: 16px; text-align: center; border: 3px solid var(--accent); width: 400px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+    .modal-content h3 { color: var(--accent); margin-bottom: 20px; font-size: 20px; }
+    .modal-content input, .modal-content select, .modal-content textarea { width: 100%; padding: 12px; margin-bottom: 12px; border-radius: 8px; border: 2px solid var(--border); background: #1a1a1a; color: #fff; font-size: 14px; font-family: inherit; }
+    .modal-content input:focus, .modal-content select:focus, .modal-content textarea:focus { outline: none; border-color: var(--accent); }
+    .modal-content textarea { min-height: 80px; resize: vertical; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .modal-actions button { flex: 1; padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: all 0.2s; }
+    .modal-actions button:hover { transform: translateY(-2px); }
+    .btn-cancel { background: #555; color: #fff; }
+    .btn-confirm { background: var(--accent); color: var(--primary); }
+    .btn-danger { background: var(--danger); color: #fff; }
+    .hint { font-size: 11px; color: #999; margin: -8px 0 12px; text-align: right; }
+    
+    .settings-list { text-align: right; font-size: 13px; margin-bottom: 12px; }
+    .settings-list .row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 8px; gap: 8px; }
+    .settings-list .row .info { flex: 1; text-align: right; }
+    .settings-list .row .info .unavail { color: var(--danger); font-size: 10px; }
+    .settings-list .row button { background: none; border: none; color: #ccc; cursor: pointer; font-size: 16px; transition: all 0.2s; }
+    .settings-list .row button:hover { transform: scale(1.2); }
+    .settings-list .row button.danger { color: var(--danger); }
+    .tab-row { display: flex; gap: 8px; margin-bottom: 20px; }
+    .tab-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; background: var(--card); color: #fff; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+    .tab-btn:hover { background: #555; }
+    .tab-btn.active { background: var(--accent); color: var(--primary); font-weight: bold; }
+    .tab-panel { display: none; text-align: right; }
+    .tab-panel.active { display: block; animation: fadeIn 0.3s ease; }
+    .report-line { display: flex; justify-content: space-between; font-size: 13px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .report-total { font-size: 20px; font-weight: bold; color: var(--accent); margin-top: 15px; text-align: center; padding: 15px; background: rgba(241,196,15,0.1); border-radius: 8px; }
+    .report-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+    .report-stat { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 12px; text-align: center; }
+    .report-stat .num { font-size: 22px; font-weight: 900; color: var(--accent); }
+    .report-stat .lbl { font-size: 11px; color: #999; margin-top: 4px; }
+    
+    /* Category manager */
+    .category-manager-item { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); border: 2px solid var(--border); border-radius: 10px; padding: 10px; margin: 8px 0; cursor: move; transition: all 0.2s; }
+    .category-manager-item:hover { border-color: var(--accent); }
+    .category-manager-item.dragging { opacity: 0.4; }
+    .category-manager-item.drag-over { border-color: var(--accent); background: rgba(241,196,15,0.1); }
+    .drag-handle { color: #888; cursor: grab; padding: 0 6px; font-size: 18px; }
+    .category-emoji-input { width: 45px; text-align: center; font-size: 18px; padding: 6px; border-radius: 6px; border: 2px solid var(--border); background: #1a1a1a; color: #fff; margin: 0; }
+    .category-name-input { flex: 1; padding: 8px; border-radius: 6px; border: 2px solid transparent; background: transparent; color: #fff; font-size: 14px; margin: 0; }
+    .category-name-input:focus { border-color: var(--accent); background: #1a1a1a; outline: none; }
+    .category-del-btn { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 18px; transition: all 0.2s; }
+    .category-del-btn:hover { transform: scale(1.2); }
+    .category-del-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .new-category-row { display: flex; gap: 8px; margin-top: 12px; }
+    .new-category-row input { margin: 0; }
+    
+    .modifier-list { border: 2px solid var(--border); border-radius: 10px; padding: 10px 15px; margin: 12px 0; background: rgba(0,0,0,0.2); text-align: right; }
+    .modifier-option { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+    .modifier-option:last-child { border-bottom: 0; }
+    .modifier-option label { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; }
+    .modifier-option input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; }
+    
+    #qrcodeBox { background: #fff; padding: 15px; border-radius: 10px; display: inline-block; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    
+    #toastContainer { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: center; }
+    .toast { background: #2d2d2d; border-right: 5px solid var(--accent); color: #fff; padding: 14px 24px; border-radius: 10px; font-size: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); opacity: 0; transform: translateY(20px); transition: all 0.3s; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.error { border-right-color: var(--danger); }
+    .toast.success { border-right-color: var(--success); }
+    .toast.warning { border-right-color: #f39c12; }
+    
+    .keyboard-hint { font-size: 10px; color: #666; margin-top: 10px; text-align: center; }
+    
+    @media print {
+        body * { visibility: hidden; }
+        #receipt-print-area, #receipt-print-area * { visibility: visible; }
+        #receipt-print-area { position: absolute; left: 0; top: 0; width: 80mm; font-family: 'Courier New', Courier, monospace; color: #000; background: #fff; padding: 10px; }
+    }
+    #receipt-print-area { display: none; }
+    
+    @media (max-width: 1200px) {
+        .sidebar { width: 240px; }
+        .order-panel { width: 380px; }
+    }
+</style>
+</head>
+<body>
+
+<div id="offlineBanner">️ لا يوجد اتصال بالإنترنت — النظام يعمل محلياً</div>
+
+<div class="sidebar">
+    <div class="logo-area">
+        <h1>🧁 Gustavo Sweet & more</h1>
+        <p>We are the happiness</p>
+    </div>
+    <div class="zones" id="zoneButtons"></div>
+    <div class="zone-config" id="zoneConfigRow">
+        <span>الطاولات:</span>
+        <input type="number" id="zoneTableCount" min="1" max="100">
+        <button class="sidebar-btn" style="margin:0; padding:8px 12px;" onclick="applyTableCount()">✓</button>
+    </div>
+    <button class="sidebar-btn" id="newTicketSidebarBtn" style="display:none;" onclick="newTakeawayTicket()">🧾 طلب تيك أواي جديد</button>
+    <button class="sidebar-btn" onclick="openSettings()">⚙️ إدارة المنيو</button>
+    <button class="sidebar-btn" onclick="openReport()">📊 تقرير المبيعات</button>
+    <button class="sidebar-btn danger" onclick="exportData()">💾 تصدير البيانات</button>
+    <button class="sidebar-btn" onclick="document.getElementById('importFile').click()">📥 استيراد البيانات</button>
+    <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
+    <div class="sidebar-footer">
+        نظام POS متقدم<br>
+        Gustavo Sweet & more - الشلف<br>
+        <span class="keyboard-hint">F2: بحث | F4: طباعة | F8: دفع</span>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="main-header">
+        <h2 id="zone-title">إدارة الطاولات</h2>
+        <div class="legend">
+            <span><i class="dot" style="background:#3a3a3a;border:2px solid #555;"></i> فارغة</span>
+            <span><i class="dot" style="background:linear-gradient(135deg, #5c2a1f, #7a3a2a);border:2px solid var(--danger);"></i> مشغولة</span>
+        </div>
+    </div>
+    <div class="tables-grid" id="tablesContainer"></div>
+</div>
+
+<div class="order-panel">
+    <div class="panel-header">
+        <h3 id="selected-table-title">اختر طاولة للبدء</h3>
+        <div class="takeaway-fields" id="takeawayFields">
+            <input type="text" id="takeawayName" placeholder="اسم الزبون (اختياري)" onchange="updateTakeawayInfo()">
+            <input type="tel" id="takeawayPhone" placeholder="رقم الهاتف (لإرسال واتساب)" onchange="updateTakeawayInfo()">
+        </div>
+    </div>
+    
+    <div class="search-box">
+        <input type="text" id="menuSearch" placeholder="🔍 ابحث في المنيو... (F2)">
+    </div>
+    <div class="category-tabs" id="categoryTabs"></div>
+    <div class="menu-selector" id="menuButtonsContainer"></div>
+    
+    <div class="order-items" id="orderItemsList"></div>
+    
+    <div class="total-row">
+        <span>المجموع:</span>
+        <span id="order-total">0,00 DA</span>
+    </div>
+    
+    <button class="action-btn kitchen-btn" id="kitchenBtn" style="display:none;" onclick="sendToKitchen()">👨‍🍳 إرسال للمطبخ (واتساب)</button>
+    <button class="action-btn wa-btn" id="waBtn" style="display:none;" onclick="sendWhatsAppConfirmation()">📱 إرسال تأكيد للزبون</button>
+    <button class="action-btn qr-btn" onclick="openQRCodeModal()">📱 QR الطاولة / PDF</button>
+    <button class="action-btn print-btn" id="printBtn" onclick="printOrder()" disabled>🖨️ طباعة الطلب (F4)</button>
+    <button class="action-btn checkout-btn" id="checkoutBtn" onclick="checkoutTable()" disabled>💰 تحصيل وإغلاق (F8)</button>
+</div>
+
+<!-- QR Modal -->
+<div id="qrModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>📱 QR Code للطاولة</h3>
+        <div id="qrcodeBox"></div>
+        <p style="font-size: 12px; color: #aaa; margin-bottom: 15px;">امسح الكود لفتح المنيو الرقمي</p>
+        <div class="modal-actions">
+            <button class="btn-confirm" onclick="downloadTableQRPoster()">📄 تحميل PDF</button>
+            <button class="btn-cancel" onclick="closeModal('qrModal')">إغلاق</button>
+        </div>
+    </div>
+</div>
+
+<!-- Custom item modal -->
+<div id="customItemModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3> إضافة عنصر مخصص</h3>
+        <input type="text" id="customItemName" placeholder="اسم المنتج">
+        <input type="number" id="customItemPrice" placeholder="السعر (DA)">
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('customItemModal')">إلغاء</button>
+            <button class="btn-confirm" onclick="confirmCustomItem()">إضافة</button>
+        </div>
+    </div>
+</div>
+
+<!-- Item modifiers modal -->
+<div id="itemOptionsModal" class="modal-overlay">
+    <div class="modal-content">
+        <h3>🎨 تخصيص الطلب</h3>
+        <div id="itemOptionsSummary" style="font-size:14px; color:#ccc; margin-bottom:10px;"></div>
+        <div id="itemOptionsList" class="modifier-list"></div>
+        <label style="font-size:12px; color:#ccc; display:block; text-align:right; margin-bottom:6px;">الكمية</label>
+        <input type="number" id="itemOptionsQuantity" min="1" max="30" value="1">
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('itemOptionsModal')">إلغاء</button>
+            <button class="btn-confirm" onclick="confirmItemOptions()">🛒 إضافة للسلة</button>
+        </div>
+    </div>
+</div>
+
+<!-- Settings modal -->
+<div id="settingsModal" class="modal-overlay">
+    <div class="modal-content" style="width: 450px;">
+        <h3>️ الإعدادات</h3>
+        <div class="tab-row">
+            <button class="tab-btn active" onclick="switchSettingsTab('menu')">المنيو</button>
+            <button class="tab-btn" onclick="switchSettingsTab('add')">إضافة/تعديل</button>
+            <button class="tab-btn" onclick="switchSettingsTab('cat')">التصنيفات</button>
+            <button class="tab-btn" onclick="switchSettingsTab('config')">الإعدادات</button>
+        </div>
+        <div class="tab-panel active" id="tabMenu">
+            <div class="settings-list" id="menuManageList"></div>
+        </div>
+        <div class="tab-panel" id="tabAdd">
+            <label style="font-size:12px; color:#ccc; display:block; text-align:right;">اسم المنتج</label>
+            <input type="text" id="newMenuName" placeholder="مثال: Dubai Cake">
+            <label style="font-size:12px; color:#ccc; display:block; text-align:right;">القسم</label>
+            <select id="newMenuCategory"></select>
+            <label style="font-size:12px; color:#ccc; display:block; text-align:right;">السعر (DA)</label>
+            <input type="number" id="newMenuPrice" placeholder="400">
+            <label style="font-size:12px; color:#ccc; display:block; text-align:right;">الإضافات (سطر لكل واحدة)</label>
+            <textarea id="newMenuExtras" placeholder="جبن إضافي: 100&#10;شوكولاتة: 150"></textarea>
+            <div class="hint">مثال: "جبن إضافي: 100"</div>
+            <button class="btn-confirm" style="width:100%; padding:12px; border-radius:8px; border:none; cursor:pointer; margin-bottom:8px;" id="saveMenuItemBtn" onclick="saveMenuItemForm()">💾 حفظ المنتج</button>
+            <button class="btn-cancel" style="width:100%; padding:12px; border-radius:8px; border:none; cursor:pointer; display:none;" id="cancelEditMenuBtn" onclick="cancelMenuItemEdit()">إلغاء التعديل</button>
+        </div>
+        <div class="tab-panel" id="tabCat">
+            <div id="categoriesList"></div>
+            <div class="new-category-row">
+                <input type="text" class="category-emoji-input" id="newCategoryEmoji" placeholder="🍽️" maxlength="4">
+                <input type="text" class="category-name-input" id="newCategoryName" placeholder="اسم قسم جديد" style="border:2px solid var(--border);">
+                <button class="btn-confirm" style="padding:0 16px; border-radius:8px; border:none; cursor:pointer;" onclick="addNewCategory()">➕</button>
+            </div>
+        </div>
+        <div class="tab-panel" id="tabConfig">
+            <label style="font-size:12px; color:#ccc; display:block; text-align:right;">رابط المنيو الرقمي</label>
+            <input type="text" id="menuUrlBase" placeholder="https://gustavo-pos.github.io/menu.html" onchange="updateConfig()">
+            <label style="font-size:12px; color:#ccc; display:block; text-align:right;">رقم واتساب المطبخ</label>
+            <input type="tel" id="kitchenPhone" placeholder="213781006798" onchange="updateConfig()">
+            <label style="font-size:12px; color:#ccc; display:block; text-align:right;">رقم واتساب الزبائن</label>
+            <input type="tel" id="customerPhone" placeholder="213781006798" onchange="updateConfig()">
+            <div class="hint">الأرقام بدون + أو 00</div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal('settingsModal')">إغلاق</button>
+        </div>
+    </div>
+</div>
+
+<!-- Sales report modal -->
+<div id="reportModal" class="modal-overlay">
+    <div class="modal-content" style="width: 400px;">
+        <h3>📊 تقرير المبيعات اليومي</h3>
+        <div id="reportBody"></div>
+        <div class="modal-actions">
+            <button class="btn-danger" onclick="clearReport()">️ مسح التقرير</button>
+            <button class="btn-cancel" onclick="closeModal('reportModal')">إغلاق</button>
+        </div>
+    </div>
+</div>
+
+<div id="toastContainer"></div>
+
+<!-- Print template -->
+<div id="receipt-print-area">
+    <div style="text-align: center; font-weight: bold; font-size: 16px;">Gustavo Sweet & more</div>
+    <div style="text-align: center; font-size: 11px; margin-bottom: 10px;">We are the happiness - الشلف</div>
+    <hr style="border: dashed 1px #000; margin: 5px 0;">
+    <div id="receipt-meta">Plan: SALLE | Table: 1</div>
+    <div id="receipt-customer" style="font-size: 11px;"></div>
+    <div id="receipt-date" style="font-size: 11px;">Date: --/--/---- --:--</div>
+    <hr style="border: dashed 1px #000; margin: 5px 0;">
+    <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 12px;">
+        <span style="width: 30px;">Qte</span><span style="flex: 1;">Article</span><span>Montant</span>
+    </div>
+    <hr style="border: dashed 1px #000; margin: 5px 0;">
+    <div id="receipt-items-list"></div>
+    <hr style="border: dashed 1px #000; margin: 5px 0;">
+    <div style="text-align: left; font-weight: bold; font-size: 14px;" id="receipt-total-text">TOTAL: 0,00 DA</div>
+    <hr style="border: dashed 1px #000; margin: 5px 0;">
+    <div style="text-align: center; font-size: 10px; margin-top: 10px;">Soyez les bienvenus<br>Merci de votre visite! ❤️</div>
+</div>
+
+<script>
+/* ==================== Gustavo POS - Advanced System ==================== */
+/* Version: 2.0 - Optimized for Gustavo Sweet & more, Chlef */
+
+// Gustavo's Default Menu (Hardcoded for performance)
+const GUSTAVO_DEFAULT_MENU = [
+    // Cookies & Sweet treats
+    { id: 'g1', name: 'Scoop Cookies', price: 150, categoryKey: 'cat_cookies', extras: [], available: true },
+    { id: 'g2', name: 'Crunchy Cake', price: 350, categoryKey: 'cat_cakes', extras: [{name: 'كريمة إضافية', price: 50}, {name: 'فواكه', price: 100}], available: true },
+    { id: 'g3', name: 'Dubai Cake', price: 450, categoryKey: 'cat_cakes', extras: [{name: 'شوكولاتة', price: 100}, {name: 'بندق', price: 80}], available: true },
+    { id: 'g4', name: 'Crêpe Nutella', price: 300, categoryKey: 'cat_crepes', extras: [{name: 'موز', price: 50}, {name: 'آيس كريم', price: 100}], available: true },
+    { id: 'g5', name: 'Crêpe Sugar', price: 200, categoryKey: 'cat_crepes', extras: [], available: true },
+    { id: 'g6', name: 'Milkshake Vanille', price: 250, categoryKey: 'cat_drinks', extras: [{name: 'كريمة', price: 50}], available: true },
+    { id: 'g7', name: 'Milkshake Chocolat', price: 280, categoryKey: 'cat_drinks', extras: [], available: true },
+    { id: 'g8', name: 'Milkshake Fraise', price: 280, categoryKey: 'cat_drinks', extras: [], available: true },
+    { id: 'g9', name: 'Boisson Gaz 1L', price: 150, categoryKey: 'cat_drinks', extras: [], available: true },
+    { id: 'g10', name: 'Café', price: 100, categoryKey: 'cat_drinks', extras: [], available: true },
+];
+
+const GUSTAVO_CATEGORIES = [
+    { key: 'cat_cookies', emoji: '🍪', label: 'Cookies', order: 0 },
+    { key: 'cat_cakes', emoji: '', label: 'Cakes & Desserts', order: 1 },
+    { key: 'cat_crepes', emoji: '', label: 'Crêpes', order: 2 },
+    { key: 'cat_drinks', emoji: '🥤', label: 'Boissons', order: 3 },
+    { key: 'cat_special', emoji: '✨', label: 'Special Gustavo', order: 4 }
+];
+
+/* ==================== Utilities ==================== */
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str === null || str === undefined ? '' : String(str);
+    return div.innerHTML;
+}
+
+function genId(prefix) {
+    return prefix + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function formatMoney(n) {
+    n = Number(n) || 0;
+    return n.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' DA';
+}
+
+function cleanAlgerianPhone(num) {
+    let n = String(num || '').replace(/[\s\-().]/g, '');
+    n = n.replace(/^\+213/, '').replace(/^00213/, '').replace(/^213/, '').replace(/^0/, '').replace(/\D/g, '');
+    if (!/^[567]\d{8}$/.test(n)) return null;
+    return '213' + n;
+}
+
+function debounce(fn, wait) {
+    let timer;
+    return (...args) => { clearTimeout(timer); timer = setTimeout(() => fn(...args), wait); };
+}
+
+function getCurrentDateTime() {
+    const now = new Date();
+    return now.toLocaleString('fr-FR');
+}
+
+/* ==================== State & persistence ==================== */
+const STORAGE_KEY = 'gustavo_pos_v3';
+const CONFIG_KEY = 'gustavo_config';
+
+function defaultState() {
+    return {
+        categories: JSON.parse(JSON.stringify(GUSTAVO_CATEGORIES)),
+        menu: JSON.parse(JSON.stringify(GUSTAVO_DEFAULT_MENU)),
+        zones: {
+            salle: { label: 'الصالة (Salle)', dynamic: false, count: 20, tables: {} },
+            terrasse: { label: 'الترّاس (Terrasse)', dynamic: false, count: 20, tables: {} },
+            takeaway: { label: 'تيك أواي', dynamic: true, nextTicket: 1, tables: {} }
+        },
+        sales: [],
+        config: {
+            menuUrlBase: window.location.origin + '/menu.html',
+            kitchenPhone: '213781006798',
+            customerPhone: '213781006798'
+        }
+    };
+}
+
+function migrateState(raw) {
+    const base = defaultState();
+    if (!raw || typeof raw !== 'object') return base;
+    
+    const s = {
+        categories: Array.isArray(raw.categories) && raw.categories.length ? raw.categories : base.categories,
+        menu: Array.isArray(raw.menu) ? raw.menu : base.menu,
+        zones: raw.zones && typeof raw.zones === 'object' ? raw.zones : base.zones,
+        sales: Array.isArray(raw.sales) ? raw.sales : [],
+        config: raw.config || base.config
+    };
+    
+    // Ensure all zones exist
+    if (!s.zones.salle) s.zones.salle = base.zones.salle;
+    if (!s.zones.terrasse) s.zones.terrasse = base.zones.terrasse;
+    if (!s.zones.takeaway) s.zones.takeaway = base.zones.takeaway;
+    s.zones.takeaway.dynamic = true;
+    if (!s.zones.takeaway.nextTicket) s.zones.takeaway.nextTicket = 1;
+    
+    return s;
+}
+
+function loadState() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return defaultState();
+        return migrateState(JSON.parse(raw));
+    } catch (e) {
+        console.error('Load state error:', e);
+        return defaultState();
+    }
+}
+
+function saveState() {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+        console.error('Save state error:', e);
+        showToast('خطأ في الحفظ', 'error');
+    }
+}
+
+function loadConfig() {
+    try {
+        const cfg = localStorage.getItem(CONFIG_KEY);
+        if (cfg) return JSON.parse(cfg);
+    } catch (e) {}
+    return defaultState().config;
+}
+
+function saveConfig(cfg) {
+    try {
+        localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
+    } catch (e) {}
+}
+
+let state = loadState();
+let config = loadConfig();
+let currentZone = 'salle';
+let activeTable = null;
+let editingMenuItemId = null;
+let pendingOptionsItem = null;
+let activeCategoryTab = null;
+
+/* ==================== Toast Notifications ==================== */
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'toast' + (type ? ' ' + type : '');
+    t.innerText = message;
+    container.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => { 
+        t.classList.remove('show'); 
+        setTimeout(() => t.remove(), 300); 
+    }, 3000);
+}
+
+/* ==================== Network Handling ==================== */
+function updateNetworkBanner() {
+    document.getElementById('offlineBanner').classList.toggle('show', !navigator.onLine);
+}
+window.addEventListener('online', () => { 
+    updateNetworkBanner(); 
+    showToast('✅ عاد الاتصال بالإنترنت', 'success'); 
+});
+window.addEventListener('offline', () => { 
+    updateNetworkBanner(); 
+    showToast('⚠️ وضع عدم الاتصال', 'warning'); 
+});
+
+/* ==================== Modals ==================== */
+function openModal(id) { 
+    document.getElementById(id).classList.add('open'); 
+}
+function closeModal(id) { 
+    document.getElementById(id).classList.remove('open'); 
+}
+
+document.addEventListener('click', (e) => {
+    if (e.target.classList && e.target.classList.contains('modal-overlay')) {
+        e.target.classList.remove('open');
+    }
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+    }
+    // Keyboard shortcuts
+    if (e.key === 'F2') {
+        e.preventDefault();
+        document.getElementById('menuSearch').focus();
+    }
+    if (e.key === 'F4' && activeTable) {
+        e.preventDefault();
+        printOrder();
+    }
+    if (e.key === 'F8' && activeTable) {
+        e.preventDefault();
+        checkoutTable();
+    }
+});
+
+/* ==================== Categories ==================== */
+function getCategories() { return state.categories; }
+function getCategory(key) { return state.categories.find(c => c.key === key) || state.categories[0]; }
+
+/* ==================== Zones & Tables ==================== */
+function getTable(zone, num) {
+    const z = state.zones[zone];
+    if (!z.tables[num]) z.tables[num] = { order: [], openedAt: null, customerName: '', customerPhone: '' };
+    return z.tables[num];
+}
+
+function tableTotal(t) {
+    return t.order.reduce((sum, it) => sum + (it.unitPrice || it.price || 0) * it.qty, 0);
+}
+
+function elapsedLabel(openedAt) {
+    if (!openedAt) return '';
+    const mins = Math.floor((Date.now() - openedAt) / 60000);
+    if (mins < 1) return 'الآن';
+    if (mins < 60) return mins + ' د';
+    return Math.floor(mins / 60) + ' سا ' + (mins % 60) + ' د';
+}
+
+function renderZoneButtons() {
+    const container = document.getElementById('zoneButtons');
+    container.innerHTML = '';
+    Object.keys(state.zones).forEach(key => {
+        const btn = document.createElement('button');
+        btn.className = 'zone-btn' + (key === currentZone ? ' active' : '');
+        btn.innerText = key === 'salle' ? ' SALLE' : key === 'terrasse' ? '🌿 TERRASSE' : '📦 TAKEAWAY';
+        btn.onclick = () => switchZone(key);
+        container.appendChild(btn);
+    });
+}
+
+function switchZone(zone) {
+    currentZone = zone;
+    activeTable = null;
+    renderZoneButtons();
+    const z = state.zones[zone];
+    document.getElementById('zone-title').innerText = 'إدارة ' + z.label;
+    document.getElementById('zoneConfigRow').style.display = z.dynamic ? 'none' : 'flex';
+    document.getElementById('newTicketSidebarBtn').style.display = z.dynamic ? 'block' : 'none';
+    if (!z.dynamic) document.getElementById('zoneTableCount').value = z.count;
+    document.getElementById('selected-table-title').innerText = 'اختر طاولة للبدء';
+    document.getElementById('takeawayFields').classList.remove('active');
+    document.getElementById('waBtn').style.display = 'none';
+    document.getElementById('kitchenBtn').style.display = 'none';
+    renderTables();
+    updateOrderUI();
+}
+
+function applyTableCount() {
+    const val = parseInt(document.getElementById('zoneTableCount').value, 10);
+    if (!val || val < 1 || val > 200) { 
+        showToast('الرجاء إدخال عدد صحيح (1-200)', 'error'); 
+        return; 
+    }
+    state.zones[currentZone].count = val;
+    if (activeTable && activeTable > val) { 
+        activeTable = null; 
+        document.getElementById('selected-table-title').innerText = 'اختر طاولة للبدء'; 
+    }
+    saveState();
+    renderTables();
+    showToast('✅ تم تحديث عدد الطاولات', 'success');
+}
+
+function newTakeawayTicket() {
+    const z = state.zones.takeaway;
+    const num = z.nextTicket++;
+    z.tables[num] = { order: [], openedAt: Date.now(), customerName: '', customerPhone: '' };
+    saveState();
+    if (currentZone !== 'takeaway') switchZone('takeaway');
+    else renderTables();
+    selectTable(num);
+    showToast(`🧾 تم فتح طلب جديد #${num}`, 'success');
+}
+
+function renderTables() {
+    const container = document.getElementById('tablesContainer');
+    container.innerHTML = '';
+    const z = state.zones[currentZone];
+
+    if (z.dynamic) {
+        const nums = Object.keys(z.tables).map(Number).sort((a, b) => b - a);
+        nums.forEach(num => {
+            const t = z.tables[num];
+            const occupied = t.order.length > 0;
+            const card = document.createElement('div');
+            card.className = 'table-card' + (occupied ? ' occupied' : '') + (activeTable === num ? ' selected' : '');
+            card.innerHTML = `
+                <div class="table-num">#${num}</div>
+                <div class="table-status">${t.customerName ? escapeHtml(t.customerName) : (occupied ? 'قيد التحضير' : 'جديد')}</div>
+                ${occupied ? `<div class="table-amount">${formatMoney(tableTotal(t))}</div>` : ''}
+                <div class="table-timer">${elapsedLabel(t.openedAt)}</div>
+            `;
+            card.onclick = () => selectTable(num);
+            container.appendChild(card);
+        });
+        const addCard = document.createElement('div');
+        addCard.className = 'table-card new-ticket-card';
+        addCard.innerHTML = `<div style="font-size:32px;">+</div><div>طلب جديد</div>`;
+        addCard.onclick = newTakeawayTicket;
+        container.appendChild(addCard);
+        return;
+    }
+
+    for (let i = 1; i <= z.count; i++) {
+        const t = getTable(currentZone, i);
+        const occupied = t.order.length > 0;
+        const card = document.createElement('div');
+        card.className = 'table-card' + (occupied ? ' occupied' : '') + (activeTable === i ? ' selected' : '');
+        card.innerHTML = `
+            <div class="table-num">${i}</div>
+            <div class="table-status">${occupied ? 'مشغولة' : 'فارغة'}</div>
+            ${occupied ? `<div class="table-amount">${formatMoney(tableTotal(t))}</div>` : ''}
+            ${occupied ? `<div class="table-timer">${elapsedLabel(t.openedAt)}</div>` : ''}
+        `;
+        card.onclick = () => selectTable(i);
+        container.appendChild(card);
+    }
+}
+
+function selectTable(num) {
+    activeTable = num;
+    const z = state.zones[currentZone];
+    if (z.dynamic) {
+        document.getElementById('selected-table-title').innerText = `🧾 طلب سريع #${num}`;
+        document.getElementById('takeawayFields').classList.add('active');
+        const t = getTable(currentZone, num);
+        document.getElementById('takeawayName').value = t.customerName || '';
+        document.getElementById('takeawayPhone').value = t.customerPhone || '';
+        document.getElementById('waBtn').style.display = 'block';
+        document.getElementById('kitchenBtn').style.display = 'block';
+    } else {
+        document.getElementById('selected-table-title').innerText = `الطاولة ${num} (${currentZone.toUpperCase()})`;
+        document.getElementById('takeawayFields').classList.remove('active');
+        document.getElementById('waBtn').style.display = 'none';
+        document.getElementById('kitchenBtn').style.display = 'none';
+    }
+    renderTables();
+    updateOrderUI();
+}
+
+function updateTakeawayInfo() {
+    if (!activeTable || currentZone !== 'takeaway') return;
+    const t = getTable('takeaway', activeTable);
+    t.customerName = document.getElementById('takeawayName').value.trim();
+    t.customerPhone = document.getElementById('takeawayPhone').value.trim();
+    saveState();
+    renderTables();
+}
+
+/* ==================== Menu System ==================== */
+function renderCategoryTabs() {
+    const host = document.getElementById('categoryTabs');
+    const cats = getCategories();
+    if (!activeCategoryTab || !cats.find(c => c.key === activeCategoryTab)) 
+        activeCategoryTab = cats[0]?.key;
+    
+    host.innerHTML = cats.map(cat => `
+        <button type="button" class="category-tab ${cat.key === activeCategoryTab ? 'active' : ''}" 
+                onclick="setCategoryTab('${cat.key}')">
+            ${escapeHtml(cat.emoji || '🍽️')} ${escapeHtml(cat.label)}
+        </button>
+    `).join('');
+}
+
+function setCategoryTab(key) {
+    activeCategoryTab = key;
+    renderCategoryTabs();
+    renderMenuButtons();
+}
+
+function renderMenuButtons() {
+    const container = document.getElementById('menuButtonsContainer');
+    const query = (document.getElementById('menuSearch').value || '').trim().toLowerCase();
+    container.innerHTML = '';
+
+    let items;
+    if (query) {
+        items = state.menu.filter(m => m.available && m.name.toLowerCase().includes(query));
+    } else {
+        items = state.menu.filter(m => m.available && m.categoryKey === activeCategoryTab);
+    }
+
+    if (items.length === 0) {
+        container.innerHTML = '<div class="empty-menu-note">لا توجد منتجات</div>';
+    } else {
+        items.forEach(item => {
+            const btn = document.createElement('button');
+            btn.className = 'menu-item-btn';
+            btn.innerHTML = (item.extras.length ? '<span class="extras-flag">✨</span>' : '') +
+                escapeHtml(item.name) + '<br><small>' + item.price + ' DA</small>';
+            btn.onclick = () => {
+                if (item.extras.length > 0) openItemOptions(item);
+                else addOrderLine(item, [], 1);
+            };
+            container.appendChild(btn);
+        });
+    }
+
+    const customBtn = document.createElement('button');
+    customBtn.className = 'menu-item-btn custom-item-btn';
+    customBtn.innerText = '+ عنصر مخصص (سعر حر)';
+    customBtn.onclick = () => openModal('customItemModal');
+    container.appendChild(customBtn);
+}
+
+function confirmCustomItem() {
+    const name = document.getElementById('customItemName').value.trim();
+    const price = parseFloat(document.getElementById('customItemPrice').value);
+    if (!name || isNaN(price) || price < 0) { 
+        showToast('الرجاء إدخال اسم وسعر صحيحين', 'error'); 
+        return; 
+    }
+    addOrderLine({ name, price }, [], 1);
+    document.getElementById('customItemName').value = '';
+    document.getElementById('customItemPrice').value = '';
+    closeModal('customItemModal');
+}
+
+/* ==================== Item Options ==================== */
+function openItemOptions(item) {
+    pendingOptionsItem = item;
+    document.getElementById('itemOptionsSummary').innerText = `${item.name} — ${item.price} DA`;
+    const list = document.getElementById('itemOptionsList');
+    list.innerHTML = item.extras.map((extra, idx) => `
+        <div class="modifier-option">
+            <label>
+                <input type="checkbox" data-extra-idx="${idx}">
+                <span>${escapeHtml(extra.name)}</span>
+            </label>
+            <strong>${extra.price ? '+' + extra.price + ' DA' : ''}</strong>
+        </div>
+    `).join('');
+    document.getElementById('itemOptionsQuantity').value = 1;
+    openModal('itemOptionsModal');
+}
+
+function confirmItemOptions() {
+    if (!pendingOptionsItem) return;
+    const selected = pendingOptionsItem.extras.filter((e, idx) => {
+        const cb = document.querySelector(`#itemOptionsList [data-extra-idx="${idx}"]`);
+        return cb && cb.checked;
+    });
+    const qty = Math.max(1, Math.min(30, Number(document.getElementById('itemOptionsQuantity').value) || 1));
+    addOrderLine(pendingOptionsItem, selected, qty);
+    closeModal('itemOptionsModal');
+    pendingOptionsItem = null;
+}
+
+/* ==================== Order Management ==================== */
+function extrasText(extras) {
+    if (!extras || extras.length === 0) return '';
+    return extras.map(e => e.name + (e.price ? ' +' + e.price : '')).join('، ');
+}
+
+function addOrderLine(baseItem, extras, qty) {
+    if (!activeTable) { 
+        showToast('الرجاء اختيار طاولة أولاً!', 'error'); 
+        return; 
+    }
+    const t = getTable(currentZone, activeTable);
+    if (t.order.length === 0) t.openedAt = Date.now();
+
+    const unitPrice = Number(baseItem.price || 0) + extras.reduce((s, e) => s + Number(e.price || 0), 0);
+    const extrasKey = JSON.stringify(extras.map(e => e.name).sort());
+    const existing = t.order.find(it => {
+        const itExtras = it.extras ? it.extras.map(e => e.name).sort() : [];
+        return it.name === baseItem.name && JSON.stringify(itExtras) === extrasKey;
+    });
+
+    if (existing) {
+        existing.qty += qty;
+    } else {
+        t.order.push({ name: baseItem.name, unitPrice, extras, qty });
+    }
+
+    saveState();
+    updateOrderUI();
+    renderTables();
+    showToast('✅ تمت الإضافة', 'success');
+}
+
+function changeQty(index, delta) {
+    if (!activeTable) return;
+    const t = getTable(currentZone, activeTable);
+    const item = t.order[index];
+    if (!item) return;
+    item.qty += delta;
+    if (item.qty <= 0) t.order.splice(index, 1);
+    if (t.order.length === 0) t.openedAt = null;
+    saveState();
+    updateOrderUI();
+    renderTables();
+}
+
+function removeItem(index) {
+    if (!activeTable) return;
+    const t = getTable(currentZone, activeTable);
+    t.order.splice(index, 1);
+    if (t.order.length === 0) t.openedAt = null;
+    saveState();
+    updateOrderUI();
+    renderTables();
+}
+
+function updateOrderUI() {
+    const list = document.getElementById('orderItemsList');
+    const printBtn = document.getElementById('printBtn');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+
+    if (!activeTable) {
+        list.innerHTML = '<p class="empty-cart">اختر طاولة لعرض الطلبات</p>';
+        document.getElementById('order-total').innerText = formatMoney(0);
+        printBtn.disabled = true;
+        checkoutBtn.disabled = true;
+        return;
+    }
+
+    const t = getTable(currentZone, activeTable);
+    if (t.order.length === 0) {
+        list.innerHTML = '<p class="empty-cart">السلة فارغة</p>';
+        printBtn.disabled = true;
+        checkoutBtn.disabled = true;
+    } else {
+        list.innerHTML = '';
+        printBtn.disabled = false;
+        checkoutBtn.disabled = false;
+        t.order.forEach((item, idx) => {
+            const extraTxt = extrasText(item.extras);
+            const row = document.createElement('div');
+            row.className = 'item-row';
+            row.innerHTML = `
+                <span class="item-name">
+                    ${escapeHtml(item.name)}
+                    ${extraTxt ? `<small>${escapeHtml(extraTxt)}</small>` : ''}
+                </span>
+                <span class="qty-controls">
+                    <button onclick="changeQty(${idx}, -1)">−</button>
+                    <span>${item.qty}</span>
+                    <button class="plus" onclick="changeQty(${idx}, 1)">+</button>
+                </span>
+                <span class="item-sub">${formatMoney(item.unitPrice * item.qty)}</span>
+                <button class="remove-btn" onclick="removeItem(${idx})">✕</button>
+            `;
+            list.appendChild(row);
+        });
+    }
+    document.getElementById('order-total').innerText = formatMoney(tableTotal(t));
+}
+
+/* ==================== QR Code & PDF ==================== */
+function buildMenuUrl() {
+    const baseUrl = config.menuUrlBase || (window.location.origin + '/menu.html');
+    return `${baseUrl}?zone=${currentZone}&table=${activeTable}`;
+}
+
+function openQRCodeModal() {
+    if (!activeTable) { 
+        showToast('الرجاء اختيار الطاولة أولاً', 'error'); 
+        return; 
+    }
+    const menuUrl = buildMenuUrl();
+    document.getElementById('qrTitle').innerText = `QR - ${currentZone.toUpperCase()} : ${activeTable}`;
+    const box = document.getElementById('qrcodeBox');
+    box.innerHTML = '';
+    try {
+        new QRCode(box, { 
+            text: menuUrl, 
+            width: 200, 
+            height: 200, 
+            colorDark: '#4A235A', 
+            colorLight: '#ffffff' 
+        });
+    } catch (e) {
+        box.innerHTML = `<p style="color:#000; font-size:11px; width:200px;">${escapeHtml(menuUrl)}</p>`;
+    }
+    openModal('qrModal');
+}
+
+function downloadTableQRPoster() {
+    if (!activeTable) { 
+        showToast('اختر طاولة أولاً', 'error'); 
+        return; 
+    }
+    if (!window.jspdf) { 
+        showToast('جاري تحميل المكتبة...', 'warning'); 
+        return; 
+    }
+
+    const { jsPDF } = window.jspdf;
+    const docPdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a5' });
+    const menuUrl = buildMenuUrl();
+    const tempBox = document.createElement('div');
+
+    try {
+        new QRCode(tempBox, { 
+            text: menuUrl, 
+            width: 300, 
+            height: 300, 
+            colorDark: '#000000', 
+            colorLight: '#ffffff', 
+            correctLevel: QRCode.CorrectLevel.H 
+        });
+    } catch (e) {
+        showToast('تعذر توليد QR', 'error');
+        return;
+    }
+
+    setTimeout(() => {
+        docPdf.setFont('Helvetica', 'bold');
+        docPdf.setFontSize(22);
+        docPdf.text('Gustavo Sweet & more', 105, 20, { align: 'center' });
+        docPdf.setFontSize(14);
+        const label = currentZone === 'takeaway' ? 
+            `Ticket #${activeTable}` : 
+            `Table ${activeTable} - ${currentZone.toUpperCase()}`;
+        docPdf.text(label, 105, 32, { align: 'center' });
+
+        const canvasEl = tempBox.querySelector('canvas') || tempBox.querySelector('img');
+        if (canvasEl) {
+            const dataUrl = canvasEl.toDataURL ? canvasEl.toDataURL('image/png') : canvasEl.src;
+            docPdf.addImage(dataUrl, 'PNG', 52, 45, 90, 90);
+        }
+        docPdf.setFontSize(12);
+        docPdf.text('Scan for digital menu', 105, 148, { align: 'center' });
+
+        docPdf.save(`Gustavo-QR-${currentZone}-${activeTable}.pdf`);
+        showToast('📄 تم تحميل PDF', 'success');
+    }, 300);
+}
+
+/* ==================== WhatsApp Integration ==================== */
+function sendToKitchen() {
+    if (!activeTable || currentZone !== 'takeaway') return;
+    const t = getTable('takeaway', activeTable);
+    if (t.order.length === 0) { 
+        showToast('السلة فارغة!', 'error'); 
+        return; 
+    }
+
+    const phone = config.kitchenPhone || '213781006798';
+    let msg = `👨‍ *طلب جديد - Gustavo*\n\n`;
+    msg += `🧾 Ticket #${activeTable}\n`;
+    if (t.customerName) msg += `👤 ${t.customerName}\n`;
+    msg += `\n📋 *الطلب:*\n`;
+    
+    t.order.forEach((item, idx) => {
+        const extraTxt = extrasText(item.extras);
+        msg += `${idx + 1}. ${item.name} x${item.qty}`;
+        if (extraTxt) msg += ` (${extraTxt})`;
+        msg += `\n`;
+    });
+    
+    msg += `\n💰 *المجموع: ${tableTotal(t).toFixed(2)} DA*`;
+
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+    showToast('📱 تم فتح واتساب المطبخ', 'success');
+}
+
+function sendWhatsAppConfirmation() {
+    if (!activeTable || currentZone !== 'takeaway') return;
+    const t = getTable('takeaway', activeTable);
+    if (t.order.length === 0) { 
+        showToast('السلة فارغة!', 'error'); 
+        return; 
+    }
+
+    const cleaned = cleanAlgerianPhone(t.customerPhone);
+    if (!cleaned) { 
+        showToast('أدخل رقم هاتف صحيح (05/06/07 + 8 أرقام)', 'error'); 
+        return; 
+    }
+
+    const phone = config.customerPhone || '213781006798';
+    let msg = `🧁 *Gustavo Sweet & more*\n\n`;
+    msg += `مرحباً ${t.customerName || 'عزيزي الزبون'}،\n`;
+    msg += `تفاصيل طلبك:\n\n`;
+    
+    t.order.forEach((item, idx) => {
+        const extraTxt = extrasText(item.extras);
+        msg += `${idx + 1}. ${item.name}`;
+        if (extraTxt) msg += ` (${extraTxt})`;
+        msg += ` x${item.qty} — ${(item.unitPrice * item.qty).toFixed(2)} DA\n`;
+    });
+    
+    msg += `\n💰 *المجموع: ${tableTotal(t).toFixed(2)} DA*\n`;
+    msg += `\nشكراً لثقتكم! ❤️`;
+
+    window.open(`https://wa.me/${cleaned}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
+    showToast(' تم إرسال التأكيد', 'success');
+}
+
+/* ==================== Printing ==================== */
+function fillReceipt(zone, table, order, total, customerName) {
+    const label = zone === 'takeaway' ? 
+        `Type: TAKEAWAY | Ticket: #${table}` : 
+        `Plan: ${zone.toUpperCase()} | Table: ${table}`;
+    document.getElementById('receipt-meta').innerText = label;
+    document.getElementById('receipt-customer').innerText = customerName ? ('Client: ' + customerName) : '';
+    document.getElementById('receipt-date').innerText = `Date: ${getCurrentDateTime()}`;
+    
+    const receiptList = document.getElementById('receipt-items-list');
+    receiptList.innerHTML = '';
+    order.forEach(item => {
+        const sub = item.unitPrice * item.qty;
+        const extraTxt = extrasText(item.extras);
+        receiptList.innerHTML += `
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 3px;">
+                <span style="width: 30px;">${item.qty}</span>
+                <span style="flex: 1;">${escapeHtml(item.name)}</span>
+                <span>${sub.toFixed(2)} DA</span>
+            </div>
+            ${extraTxt ? `<div style="font-size:9px; color:#555; margin-bottom:4px; padding-right:30px;">+ ${escapeHtml(extraTxt)}</div>` : ''}
+        `;
+    });
+    document.getElementById('receipt-total-text').innerText = `TOTAL: ${total.toFixed(2)} DA`;
+}
+
+function printOrder() {
+    if (!activeTable) return;
+    const t = getTable(currentZone, activeTable);
+    if (t.order.length === 0) { 
+        showToast('السلة فارغة!', 'error'); 
+        return; 
+    }
+    fillReceipt(currentZone, activeTable, t.order, tableTotal(t), t.customerName);
+    window.print();
+    showToast('🖨️ جاري الطباعة...', 'success');
+}
+
+function checkoutTable() {
+    if (!activeTable) return;
+    const t = getTable(currentZone, activeTable);
+    if (t.order.length === 0) { 
+        showToast('السلة فارغة!', 'error'); 
+        return; 
+    }
+    const total = tableTotal(t);
+    
+    if (!confirm(`تحصيل ${formatMoney(total)}؟`)) return;
+    
+    fillReceipt(currentZone, activeTable, t.order, total, t.customerName);
+    window.print();
+
+    state.sales.push({
+        id: genId('sale'),
+        date: new Date().toISOString(),
+        zone: currentZone,
+        table: activeTable,
+        customerName: t.customerName || '',
+        items: t.order.map(it => ({ ...it })),
+        total
+    });
+
+    if (state.zones[currentZone].dynamic) {
+        delete state.zones[currentZone].tables[activeTable];
+        activeTable = null;
+        document.getElementById('selected-table-title').innerText = 'اختر طاولة للبدء';
+        document.getElementById('takeawayFields').classList.remove('active');
+        document.getElementById('waBtn').style.display = 'none';
+        document.getElementById('kitchenBtn').style.display = 'none';
+    } else {
+        t.order = [];
+        t.openedAt = null;
+    }
+
+    saveState();
+    updateOrderUI();
+    renderTables();
+    showToast('✅ تم التحصيل وإغلاق الطاولة', 'success');
+}
+
+/* ==================== Settings ==================== */
+function openSettings() {
+    populateCategorySelect();
+    renderMenuManageList();
+    renderCategoryManager();
+    
+    // Load config
+    document.getElementById('menuUrlBase').value = config.menuUrlBase || '';
+    document.getElementById('kitchenPhone').value = config.kitchenPhone || '';
+    document.getElementById('customerPhone').value = config.customerPhone || '';
+    
+    switchSettingsTab('menu');
+    openModal('settingsModal');
+}
+
+function switchSettingsTab(tab) {
+    ['menu', 'add', 'cat', 'config'].forEach(id => {
+        document.getElementById('tab' + id.charAt(0).toUpperCase() + id.slice(1))
+            .classList.toggle('active', tab === id);
+        const btn = document.querySelector(`button[onclick="switchSettingsTab('${tab}')"]`);
+        if (btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+    });
+}
+
+function updateConfig() {
+    config.menuUrlBase = document.getElementById('menuUrlBase').value.trim();
+    config.kitchenPhone = document.getElementById('kitchenPhone').value.trim();
+    config.customerPhone = document.getElementById('customerPhone').value.trim();
+    saveConfig(config);
+    state.config = config;
+    saveState();
+    showToast('✅ تم حفظ الإعدادات', 'success');
+}
+
+function populateCategorySelect() {
+    const select = document.getElementById('newMenuCategory');
+    select.innerHTML = getCategories().map(c => 
+        `<option value="${escapeHtml(c.key)}">${escapeHtml(c.emoji || '🍽️')} ${escapeHtml(c.label)}</option>`
+    ).join('');
+}
+
+function renderCategoryManager() {
+    const list = document.getElementById('categoriesList');
+    const cats = getCategories();
+    if (cats.length === 0) { 
+        list.innerHTML = '<p style="color:#777; font-size:12px;">لا توجد تصنيفات</p>'; 
+        return; 
+    }
+    list.innerHTML = cats.map((cat, idx) => `
+        <div class="category-manager-item" draggable="true" data-idx="${idx}"
+             ondragstart="dragCatStart(event, ${idx})" 
+             ondragover="event.preventDefault()"
+             ondragenter="dragCatEnter(event)" 
+             ondragleave="dragCatLeave(event)"
+             ondrop="dropCat(event, ${idx})" 
+             ondragend="dragCatEnd(event)">
+            <span class="drag-handle">⋮⋮</span>
+            <input type="text" class="category-emoji-input" 
+                   value="${escapeHtml(cat.emoji || '🍽️')}" 
+                   maxlength="4" 
+                   onchange="updateCatEmoji(${idx}, this.value)">
+            <input type="text" class="category-name-input" 
+                   value="${escapeHtml(cat.label)}" 
+                   maxlength="30" 
+                   onchange="updateCatName(${idx}, this.value)">
+            <button class="category-del-btn" 
+                    onclick="deleteCategory(${idx})" 
+                    ${cats.length <= 1 ? 'disabled' : ''} 
+                    title="حذف">🗑️</button>
+        </div>
+    `).join('');
+}
+
+function updateCatName(idx, val) {
+    const trimmed = val.trim();
+    if (!trimmed) { 
+        showToast('لا يمكن ترك اسم القسم فارغاً', 'error'); 
+        renderCategoryManager(); 
+        return; 
+    }
+    state.categories[idx].label = trimmed;
+    saveState();
+    populateCategorySelect();
+    renderCategoryTabs();
+    renderMenuButtons();
+}
+
+function updateCatEmoji(idx, val) {
+    state.categories[idx].emoji = val.trim() || '🍽️';
+    saveState();
+    populateCategorySelect();
+    renderCategoryTabs();
+    renderMenuButtons();
+}
+
+function addNewCategory() {
+    const emojiInput = document.getElementById('newCategoryEmoji');
+    const nameInput = document.getElementById('newCategoryName');
+    const emoji = emojiInput.value.trim() || '️';
+    const name = nameInput.value.trim();
+    
+    if (!name) { 
+        showToast('أدخل اسم القسم', 'error'); 
+        return; 
+    }
+    if (state.categories.find(c => c.label.toLowerCase() === name.toLowerCase())) { 
+        showToast('القسم موجود بالفعل', 'error'); 
+        return; 
+    }
+
+    state.categories.push({ 
+        key: genId('cat'), 
+        emoji, 
+        label: name, 
+        order: state.categories.length 
+    });
+    saveState();
+    emojiInput.value = '';
+    nameInput.value = '';
+    renderCategoryManager();
+    populateCategorySelect();
+    renderCategoryTabs();
+    renderMenuButtons();
+    showToast('✅ تمت الإضافة', 'success');
+}
+
+function deleteCategory(idx) {
+    if (state.categories.length <= 1) { 
+        showToast('يجب وجود قسم واحد على الأقل', 'error'); 
+        return; 
+    }
+    const cat = state.categories[idx];
+    const itemsInCat = state.menu.filter(m => m.categoryKey === cat.key).length;
+    const msg = itemsInCat > 0 ?
+        `هذا القسم يحتوي على ${itemsInCat} منتج. هل تريد المتابعة؟` :
+        `حذف قسم "${cat.label}"؟`;
+    
+    if (!confirm(msg)) return;
+
+    const fallbackKey = state.categories[idx === 0 ? 1 : 0].key;
+    state.menu.forEach(m => { 
+        if (m.categoryKey === cat.key) m.categoryKey = fallbackKey; 
+    });
+    state.categories.splice(idx, 1);
+    state.categories.forEach((c, i) => c.order = i);
+    saveState();
+    renderCategoryManager();
+    populateCategorySelect();
+    renderMenuManageList();
+    activeCategoryTab = null;
+    renderCategoryTabs();
+    renderMenuButtons();
+    showToast('✅ تم الحذف', 'success');
+}
+
+let dragCatSrc = null;
+function dragCatStart(e, idx) { 
+    dragCatSrc = idx; 
+    e.dataTransfer.effectAllowed = 'move'; 
+    e.target.classList.add('dragging'); 
+}
+function dragCatEnter(e) { 
+    const item = e.target.closest('.category-manager-item'); 
+    if (item) item.classList.add('drag-over'); 
+}
+function dragCatLeave(e) { 
+    const item = e.target.closest('.category-manager-item'); 
+    if (item) item.classList.remove('drag-over'); 
+}
+function dropCat(e, targetIdx) {
+    e.preventDefault();
+    const item = e.target.closest('.category-manager-item');
+    if (item) item.classList.remove('drag-over');
+    if (dragCatSrc === null || dragCatSrc === targetIdx) return;
+    
+    const [moved] = state.categories.splice(dragCatSrc, 1);
+    state.categories.splice(targetIdx, 0, moved);
+    state.categories.forEach((c, i) => c.order = i);
+    saveState();
+    renderCategoryManager();
+    renderCategoryTabs();
+    renderMenuButtons();
+}
+function dragCatEnd(e) {
+    e.target.closest('.category-manager-item')?.classList.remove('dragging');
+    document.querySelectorAll('.category-manager-item').forEach(el => el.classList.remove('drag-over'));
+    dragCatSrc = null;
+}
+
+/* ==================== Menu Items Management ==================== */
+function parseExtrasTextarea(val) {
+    if (!val || typeof val !== 'string') return [];
+    return val.split('\n').map(line => {
+        const parts = line.split(':');
+        const name = (parts[0] || '').trim();
+        const price = parts[1] ? Math.max(0, Number(parts[1].trim()) || 0) : 0;
+        return name ? { name, price } : null;
+    }).filter(Boolean);
+}
+
+function renderMenuManageList() {
+    const container = document.getElementById('menuManageList');
+    if (state.menu.length === 0) { 
+        container.innerHTML = '<p style="color:#777; font-size:12px;">لا توجد منتجات</p>'; 
+        return; 
+    }
+    container.innerHTML = state.menu.map(item => {
+        const cat = getCategory(item.categoryKey);
+        return `
+        <div class="row">
+            <div class="info">
+                <div>${escapeHtml(cat?.emoji || '🍽️')} ${escapeHtml(item.name)} — ${item.price} DA 
+                ${item.extras.length ? '✨' : ''}</div>
+                ${!item.available ? '<div class="unavail">غير متاح</div>' : ''}
+            </div>
+            <button title="${item.available ? 'إخفاء' : 'إظهار'}" 
+                    onclick="toggleMenuItemAvailability('${item.id}')">
+                ${item.available ? '⏸️' : '▶️'}
+            </button>
+            <button title="تعديل" onclick="startEditMenuItem('${item.id}')">✏️</button>
+            <button title="حذف" class="danger" onclick="deleteMenuItem('${item.id}')">🗑️</button>
+        </div>`;
+    }).join('');
+}
+
+function toggleMenuItemAvailability(id) {
+    const item = state.menu.find(m => m.id === id);
+    if (!item) return;
+    item.available = !item.available;
+    saveState();
+    renderMenuManageList();
+    renderMenuButtons();
+    showToast(item.available ? '✅ المنتج متاح' : '⏸️ تم الإخفاء', 'success');
+}
+
+function startEditMenuItem(id) {
+    const item = state.menu.find(m => m.id === id);
+    if (!item) return;
+    editingMenuItemId = id;
+    document.getElementById('newMenuName').value = item.name;
+    document.getElementById('newMenuCategory').value = item.categoryKey;
+    document.getElementById('newMenuPrice').value = item.price;
+    document.getElementById('newMenuExtras').value = item.extras
+        .map(e => e.name + (e.price ? ': ' + e.price : '')).join('\n');
+    document.getElementById('saveMenuItemBtn').innerText = '💾 حفظ التعديلات';
+    document.getElementById('cancelEditMenuBtn').style.display = 'block';
+    switchSettingsTab('add');
+}
+
+function cancelMenuItemEdit() {
+    editingMenuItemId = null;
+    document.getElementById('newMenuName').value = '';
+    document.getElementById('newMenuPrice').value = '';
+    document.getElementById('newMenuExtras').value = '';
+    document.getElementById('saveMenuItemBtn').innerText = '💾 حفظ المنتج';
+    document.getElementById('cancelEditMenuBtn').style.display = 'none';
+}
+
+function saveMenuItemForm() {
+    const name = document.getElementById('newMenuName').value.trim();
+    const categoryKey = document.getElementById('newMenuCategory').value;
+    const price = parseFloat(document.getElementById('newMenuPrice').value);
+    const extras = parseExtrasTextarea(document.getElementById('newMenuExtras').value);
+
+    if (!name || isNaN(price) || price < 0) { 
+        showToast('أدخل اسم وسعر صحيحين', 'error'); 
+        return; 
+    }
+
+    if (editingMenuItemId) {
+        const item = state.menu.find(m => m.id === editingMenuItemId);
+        if (item) { 
+            item.name = name; 
+            item.categoryKey = categoryKey; 
+            item.price = price; 
+            item.extras = extras; 
+        }
+        showToast('✅ تم التحديث', 'success');
+        cancelMenuItemEdit();
+    } else {
+        state.menu.push({ 
+            id: genId('m'), 
+            name, 
+            categoryKey, 
+            price, 
+            extras, 
+            available: true 
+        });
+        showToast('✅ تمت الإضافة', 'success');
+        document.getElementById('newMenuName').value = '';
+        document.getElementById('newMenuPrice').value = '';
+        document.getElementById('newMenuExtras').value = '';
+    }
+
+    saveState();
+    renderMenuManageList();
+    renderMenuButtons();
+    switchSettingsTab('menu');
+}
+
+function deleteMenuItem(id) {
+    if (!confirm('حذف نهائي لهذا المنتج؟')) return;
+    state.menu = state.menu.filter(m => m.id !== id);
+    saveState();
+    renderMenuManageList();
+    renderMenuButtons();
+    showToast('✅ تم الحذف', 'success');
+}
+
+/* ==================== Sales Report ==================== */
+function isToday(isoDate) {
+    const d = new Date(isoDate);
+    const now = new Date();
+    return d.getFullYear() === now.getFullYear() && 
+           d.getMonth() === now.getMonth() && 
+           d.getDate() === now.getDate();
+}
+
+function openReport() {
+    const todaySales = state.sales.filter(s => isToday(s.date));
+    const body = document.getElementById('reportBody');
+    
+    if (todaySales.length === 0) {
+        body.innerHTML = '<p style="color:#777; font-size:13px; text-align:center; margin:20px 0;">لا توجد مبيعات اليوم</p>';
+        openModal('reportModal');
+        return;
+    }
+    
+    const itemTotals = {};
+    let grandTotal = 0;
+    let totalOrders = 0;
+    
+    todaySales.forEach(sale => {
+        grandTotal += sale.total;
+        totalOrders++;
+        sale.items.forEach(it => {
+            if (!itemTotals[it.name]) 
+                itemTotals[it.name] = { qty: 0, revenue: 0 };
+            itemTotals[it.name].qty += it.qty;
+            itemTotals[it.name].revenue += it.unitPrice * it.qty;
+        });
+    });
+    
+    let topName = '', topQty = 0;
+    Object.keys(itemTotals).forEach(k => { 
+        if (itemTotals[k].qty > topQty) { 
+            topQty = itemTotals[k].qty; 
+            topName = k; 
+        } 
+    });
+
+    let html = `
+        <div class="report-stats">
+            <div class="report-stat">
+                <div class="num">${totalOrders}</div>
+                <div class="lbl">عدد الطلبات</div>
+            </div>
+            <div class="report-stat">
+                <div class="num">${topQty > 0 ? escapeHtml(topName) : '-'}</div>
+                <div class="lbl">الأكثر مبيعاً</div>
+            </div>
+        </div>
+    `;
+    
+    Object.keys(itemTotals).sort().forEach(name => {
+        html += `
+            <div class="report-line">
+                <span>${escapeHtml(name)}</span>
+                <span>${itemTotals[name].qty}× — ${itemTotals[name].revenue.toFixed(2)} DA</span>
+            </div>
+        `;
+    });
+    
+    html += `<div class="report-total">الإجمالي: ${grandTotal.toFixed(2)} DA</div>`;
+    body.innerHTML = html;
+    openModal('reportModal');
+}
+
+function clearReport() {
+    if (!confirm('⚠️ هل أنت متأكد من مسح تقرير اليوم؟')) return;
+    state.sales = state.sales.filter(s => !isToday(s.date));
+    saveState();
+    openReport();
+    showToast('✅ تم المسح', 'success');
+}
+
+/* ==================== Backup & Restore ==================== */
+function exportData() {
+    const dataStr = JSON.stringify(state, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `gustavo_backup_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showToast('💾 تم تصدير البيانات', 'success');
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const imported = JSON.parse(e.target.result);
+            if (confirm('⚠️ سيتم استبدال البيانات الحالية. هل تريد المتابعة؟')) {
+                state = migrateState(imported);
+                saveState();
+                location.reload();
+            }
+        } catch (err) {
+            showToast('❌ ملف غير صالح', 'error');
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+}
+
+/* ==================== PWA Service Worker ==================== */
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch(() => {
+        console.log('SW registration failed');
+    });
+}
+
+/* ==================== Initialization ==================== */
+function init() {
+    updateNetworkBanner();
+    renderZoneButtons();
+    const z = state.zones[currentZone];
+    document.getElementById('zone-title').innerText = 'إدارة ' + z.label;
+    document.getElementById('zoneConfigRow').style.display = z.dynamic ? 'none' : 'flex';
+    document.getElementById('newTicketSidebarBtn').style.display = z.dynamic ? 'block' : 'none';
+    if (!z.dynamic) document.getElementById('zoneTableCount').value = z.count;
+    
+    renderCategoryTabs();
+    renderMenuButtons();
+    renderTables();
+    updateOrderUI();
+    
+    document.getElementById('menuSearch').addEventListener('input', debounce(renderMenuButtons, 200));
+    setInterval(renderTables, 30000); // Update timers every 30s
+    
+    showToast(' Gustavo POS جاهز!', 'success');
+}
+
+// Start the system
+init();
+</script>
+</body>
+          </html>
