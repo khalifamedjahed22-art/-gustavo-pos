@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#4A235A">
+<title>Gustavo Sweet & more - المنيو الرقمي</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
+    body { 
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); 
+        color: #fff; 
+        min-height: 100vh;
+        padding-bottom: 100px;
+    }
+    
+    .header {
+        background: linear-gradient(135deg, #4A235A 0%, #6c3483 100%);
+        padding: 30px 20px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+    .header h1 { color: #F1C40F; font-size: 28px; margin-bottom: 8px; }
+    .header p { color: #ddd; font-size: 14px; }
+    .table-info {
+        background: rgba(241,196,15,0.2);
+        border: 2px solid #F1C40F;
+        border-radius: 10px;
+        padding: 12px;
+        margin: 20px;
+        text-align: center;
+        font-size: 16px;
+        font-weight: bold;
+    }
+    
+    .category-section { margin: 25px 15px; }
+    .category-title {
+        color: #F1C40F;
+        font-size: 20px;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #F1C40F;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
+    .menu-item {
+        background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+        border: 2px solid #404040;
+        border-radius: 12px;
+        padding: 18px;
+        transition: all 0.3s;
+        cursor: pointer;
+    }
+    .menu-item:hover {
+        border-color: #F1C40F;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(241,196,15,0.2);
+    }
+    .item-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
+    .item-name { font-size: 16px; font-weight: bold; color: #fff; }
+    .item-price { color: #F1C40F; font-size: 18px; font-weight: bold; }
+    .item-extras { 
+        font-size: 12px; 
+        color: #999; 
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 1px solid #404040;
+    }
+    .extras-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .extra-tag {
+        background: rgba(241,196,15,0.15);
+        color: #F1C40F;
+        padding: 3px 8px;
+        border-radius: 12px;
+        font-size: 11px;
+    }
+    
+    .cart-bar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #2ECC71 0%, #27ae60 100%);
+        padding: 20px;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+        display: none;
+    }
+    .cart-bar.show { display: block; }
+    .cart-content {
+        max-width: 600px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .cart-total { color: #fff; font-size: 22px; font-weight: bold; }
+    .cart-btn {
+        background: #fff;
+        color: #2ECC71;
+        border: none;
+        padding: 14px 30px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .cart-btn:hover { transform: scale(1.05); }
+    
+    .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    .modal.show { display: flex; }
+    .modal-content {
+        background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+        border: 3px solid #F1C40F;
+        border-radius: 16px;
+        padding: 30px;
+        width: 100%;
+        max-width: 400px;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+    .modal-title { color: #F1C40F; font-size: 20px; margin-bottom: 20px; text-align: center; }
+    .modifier-option {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px;
+        margin: 8px 0;
+        background: rgba(255,255,255,0.05);
+        border-radius: 8px;
+    }
+    .modifier-option label { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; }
+    .modifier-option input[type="checkbox"] { width: 20px; height: 20px; accent-color: #F1C40F; }
+    .qty-selector {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+        margin: 20px 0;
+    }
+    .qty-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        background: #F1C40F;
+        color: #4A235A;
+        font-size: 20px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .qty-value { font-size: 24px; font-weight: bold; min-width: 40px; text-align: center; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .modal-actions button {
+        flex: 1;
+        padding: 14px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+    .btn-cancel { background: #555; color: #fff; }
+    .btn-confirm { background: #F1C40F; color: #4A235A; }
+    
+    .empty-msg { text-align: center; color: #777; padding: 40px; font-size: 16px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>🧁 Gustavo Sweet & more</h1>
+    <p>We are the happiness</p>
+</div>
+
+<div class="table-info" id="tableInfo"></div>
+
+<div id="menuContainer"></div>
+
+<div class="cart-bar" id="cartBar">
+    <div class="cart-content">
+        <div class="cart-total" id="cartTotal">0,00 DA</div>
+        <button class="cart-btn" onclick="showCart()"> عرض الطلب (<span id="cartCount">0</span>)</button>
+    </div>
+</div>
+
+<div class="modal" id="itemModal">
+    <div class="modal-content">
+        <h3 class="modal-title" id="modalTitle">تخصيص الطلب</h3>
+        <div id="modalBody"></div>
+        <div class="qty-selector">
+            <button class="qty-btn" onclick="changeQty(-1)">−</button>
+            <span class="qty-value" id="modalQty">1</span>
+            <button class="qty-btn" onclick="changeQty(1)">+</button>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeModal()">إلغاء</button>
+            <button class="btn-confirm" onclick="addToCart()">إضافة للسلة</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="cartModal">
+    <div class="modal-content" style="max-width: 500px;">
+        <h3 class="modal-title"> طلبك</h3>
+        <div id="cartItems"></div>
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #F1C40F;">
+            <div style="display: flex; justify-content: space-between; font-size: 22px; font-weight: bold; color: #F1C40F;">
+                <span>المجموع:</span>
+                <span id="cartTotalModal">0,00 DA</span>
+            </div>
+        </div>
+        <div class="modal-actions" style="margin-top: 20px;">
+            <button class="btn-cancel" onclick="closeCart()">إغلاق</button>
+            <button class="btn-confirm" onclick="sendOrder()">📱 إرسال الطلب</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Customer Menu System - Read Only
+const urlParams = new URLSearchParams(window.location.search);
+const zone = urlParams.get('zone') || 'salle';
+const table = urlParams.get('table') || '1';
+
+let cart = [];
+let currentItem = null;
+let currentQty = 1;
+let currentExtras = [];
+
+// Load menu from localStorage (shared with POS)
+function loadMenu() {
+    try {
+        const state = JSON.parse(localStorage.getItem('gustavo_pos_v3'));
+        return state ? { menu: state.menu, categories: state.categories } : null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function formatMoney(n) {
+    return Number(n).toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' DA';
+}
+
+function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+}
+
+function init() {
+    const data = loadMenu();
+    if (!data) {
+        document.getElementById('menuContainer').innerHTML = 
+            '<div class="empty-msg">⚠️ تعذر تحميل المنيو. تأكد من فتح النظام من الطاولة.</div>';
+        return;
+    }
+    
+    // Show table info
+    const zoneLabel = zone === 'salle' ? 'SALLE' : zone === 'terrasse' ? 'TERRASSE' : 'TAKEAWAY';
+    document.getElementById('tableInfo').innerHTML = 
+        ` ${zoneLabel} | 🪑 الطاولة: ${table}`;
+    
+    // Group by category
+    const categories = data.categories;
+    const menu = data.menu.filter(m => m.available);
+    
+    let html = '';
+    categories.forEach(cat => {
+        const catItems = menu.filter(m => m.categoryKey === cat.key);
+        if (catItems.length === 0) return;
+        
+        html += `
+            <div class="category-section">
+                <div class="category-title">${escapeHtml(cat.emoji || '🍽️')} ${escapeHtml(cat.label)}</div>
+                <div class="menu-grid">
+                    ${catItems.map(item => `
+                        <div class="menu-item" onclick="openItem(${item.id})">
+                            <div class="item-header">
+                                <div class="item-name">${escapeHtml(item.name)}</div>
+                                <div class="item-price">${item.price} DA</div>
+                            </div>
+                            ${item.extras.length > 0 ? `
+                                <div class="item-extras">
+                                    <div>الإضافات المتاحة:</div>
+                                    <div class="extras-list">
+                                        ${item.extras.map(e => 
+                                            `<span class="extra-tag">${escapeHtml(e.name)} +${e.price} DA</span>`
+                                        ).join('')}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    });
+    
+    document.getElementById('menuContainer').innerHTML = html || 
+        '<div class="empty-msg">لا توجد منتجات متاحة حالياً</div>';
+}
+
+function openItem(id) {
+    const data = loadMenu();
+    const item = data.menu.find(m => m.id === id);
+    if (!item) return;
+    
+    currentItem = item;
+    currentQty = 1;
+    currentExtras = [];
+    
+    document.getElementById('modalTitle').innerText = item.name;
+    
+    let body = '';
+    if (item.extras.length > 0) {
+        body = '<div style="margin: 15px 0;">';
+        item.extras.forEach((extra, idx) => {
+            body += `
+                <div class="modifier-option">
+                    <label>
+                        <input type="checkbox" data-idx="${idx}" onchange="toggleExtra(${idx}, ${extra.price})">
+                        <span>${escapeHtml(extra.name)}</span>
+                    </label>
+                    <span style="color: #F1C40F;">+${extra.price} DA</span>
+                </div>
+            `;
+        });
+        body += '</div>';
+    } else {
+        body = '<p style="text-align: center; color: #999; padding: 20px;">لا توجد إضافات</p>';
+    }
+    
+    document.getElementById('modalBody').innerHTML = body;
+    document.getElementById('modalQty').innerText = '1';
+    document.getElementById('itemModal').classList.add('show');
+}
+
+function toggleExtra(idx, price) {
+    const cb = document.querySelector(`input[data-idx="${idx}"]`);
+    const extra = currentItem.extras[idx];
+    
+    if (cb.checked) {
+        currentExtras.push(extra);
+    } else {
+        currentExtras = currentExtras.filter(e => e.name !== extra.name);
+    }
+}
+
+function changeQty(delta) {
+    currentQty = Math.max(1, Math.min(20, currentQty + delta));
+    document.getElementById('modalQty').innerText = currentQty;
+}
+
+function closeModal() {
+    document.getElementById('itemModal').classList.remove('show');
+    currentItem = null;
+}
+
+function addToCart() {
+    if (!currentItem) return;
+    
+    const extrasTotal = currentExtras.reduce((sum, e) => sum + e.price, 0);
+    const unitPrice = currentItem.price + extrasTotal;
+    
+    const existing = cart.find(item => 
+        item.id === currentItem.id && 
+        JSON.stringify(item.extras.map(e => e.name).sort()) === 
+        JSON.stringify(currentExtras.map(e => e.name).sort())
+    );
+    
+    if (existing) {
+        existing.qty += currentQty;
+    } else {
+        cart.push({
+            id: currentItem.id,
+            name: currentItem.name,
+            price: currentItem.price,
+            extras: currentExtras,
+            unitPrice: unitPrice,
+            qty: currentQty
+        });
+    }
+    
+    closeModal();
+    updateCart();
+    
+    // Show feedback
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = '✅ تمت الإضافة';
+    setTimeout(() => btn.innerText = originalText, 1500);
+}
+
+function updateCart() {
+    const total = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
+    const count = cart.reduce((sum, item) => sum + item.qty, 0);
+    
+    document.getElementById('cartTotal').innerText = formatMoney(total);
+    document.getElementById('cartCount').innerText = count;
+    
+    if (cart.length > 0) {
+        document.getElementById('cartBar').classList.add('show');
+    } else {
+        document.getElementById('cartBar').classList.remove('show');
+    }
+}
+
+function showCart() {
+    const total = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
+    
+    let html = '';
+    cart.forEach((item, idx) => {
+        const extrasText = item.extras.length > 0 ? 
+            `<br><small style="color: #999;">${item.extras.map(e => e.name).join(', ')}</small>` : '';
+        
+        html += `
+            <div style="display: flex; justify-content: space-between; align-items: center; 
+                        padding: 12px; margin: 8px 0; background: rgba(255,255,255,0.05); 
+                        border-radius: 8px;">
+                <div style="flex: 1;">
+                    <div style="font-weight: bold;">${escapeHtml(item.name)} x${item.qty}</div>
+                    ${extrasText}
+                </div>
+                <div style="color: #F1C40F; font-weight: bold;">
+                    ${formatMoney(item.unitPrice * item.qty)}
+                </div>
+                <button onclick="removeFromCart(${idx})" 
+                        style="background: #E74C3C; color: #fff; border: none; 
+                               width: 30px; height: 30px; border-radius: 6px; 
+                               cursor: pointer; margin-right: 10px;">✕</button>
+            </div>
+        `;
+    });
+    
+    document.getElementById('cartItems').innerHTML = html;
+    document.getElementById('cartTotalModal').innerText = formatMoney(total);
+    document.getElementById('cartModal').classList.add('show');
+}
+
+function removeFromCart(idx) {
+    cart.splice(idx, 1);
+    showCart();
+    updateCart();
+}
+
+function closeCart() {
+    document.getElementById('cartModal').classList.remove('show');
+}
+
+function sendOrder() {
+    if (cart.length === 0) return;
+    
+    const total = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
+    
+    let msg = `📋 *طلب جديد من الطاولة*\n\n`;
+    msg += ` ${zone.toUpperCase()} | طاولة ${table}\n\n`;
+    msg += `*الطلب:*\n`;
+    
+    cart.forEach((item, idx) => {
+        const extrasText = item.extras.length > 0 ? 
+            ` (${item.extras.map(e => e.name).join(', ')})` : '';
+        msg += `${idx + 1}. ${item.name}${extrasText} x${item.qty} — ${formatMoney(item.unitPrice * item.qty)}\n`;
+    });
+    
+    msg += `\n💰 *المجموع: ${formatMoney(total)}*`;
+    
+    // Open WhatsApp with order
+    const phone = '213781006798'; // Gustavo's number
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+    
+    // Clear cart after sending
+    cart = [];
+    updateCart();
+    closeCart();
+}
+
+// Close modals on outside click
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.classList.remove('show');
+        }
+    });
+});
+
+// Initialize
+init();
+</script>
+</body>
+</html>
