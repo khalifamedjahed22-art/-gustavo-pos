@@ -60,7 +60,7 @@
 <body>
 
 <div class="header">
-    <h1>🧁 Gustavo Sweet & more</h1>
+    <h1> Gustavo Sweet & more</h1>
     <p>We are the happiness</p>
 </div>
 
@@ -115,7 +115,6 @@
 <div id="toast" class="toast"></div>
 
 <script>
-// Supabase Configuration
 const SUPABASE_URL = 'https://uvwjhciczohvufllgmac.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_hYoya1WlpuWhoLN7QsRyLA_XUmrxHvy';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -179,7 +178,7 @@ async function loadData() {
 
 function renderMenu() {
     const zoneLabel = zone === 'salle' ? 'SALLE' : zone === 'terrasse' ? 'TERRASSE' : 'TAKEAWAY';
-    document.getElementById('tableInfoText').innerHTML = `📍 ${zoneLabel} | 🪑 الطاولة: ${table}`;
+    document.getElementById('tableInfoText').innerHTML = ` ${zoneLabel} | 🪑 الطاولة: ${table}`;
 
     const categories = menuData.categories || [];
     const menu = (menuData.menu || []).filter(m => m.available);
@@ -379,7 +378,7 @@ function sendViaWhatsApp() {
     cart.forEach((item, idx) => {
         msg += `${idx + 1}. ${item.name} x${item.qty} - ${formatMoney(item.unitPrice * item.qty)}\n`;
     });
-    msg += `\n *المجموع: ${formatMoney(cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0))}*`;
+    msg += `\n💰 *المجموع: ${formatMoney(cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0))}*`;
 
     const kitchenPhone = '213781006798';
     window.open(`https://wa.me/${kitchenPhone}?text=${encodeURIComponent(msg)}`, '_blank');
