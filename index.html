@@ -9,6 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
     :root {
         --primary: #4A235A;
@@ -179,7 +180,6 @@
 
     #qrcodeBox { background: #fff; padding: 15px; border-radius: 10px; display: inline-block; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
-    /* Image upload */
     .img-upload-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 14px; text-align: center; margin-bottom: 12px; background: rgba(255,255,255,0.03); }
     .img-upload-zone input[type="file"] { margin-bottom: 0; }
     #menuImagePreviewWrap { display: none; margin-top: 10px; position: relative; display: inline-block; }
@@ -188,7 +188,6 @@
     #removeMenuImageBtn { position: absolute; top: -8px; left: -8px; background: var(--danger); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 13px; }
     .upload-status { font-size: 12px; color: var(--accent); margin-top: 6px; }
 
-    /* Printer connection status */
     .printer-status-box { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; }
     .printer-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--danger); display: inline-block; margin-left: 6px; }
     .printer-dot.connected { background: var(--success); }
@@ -201,6 +200,82 @@
     .toast.warning { border-right-color: #f39c12; }
 
     .keyboard-hint { font-size: 10px; color: #666; margin-top: 10px; text-align: center; }
+
+    /* Incoming Orders Panel */
+    .orders-panel {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        width: 320px;
+        max-height: 80vh;
+        background: var(--panel);
+        border: 2px solid var(--accent);
+        border-radius: 12px;
+        padding: 15px;
+        z-index: 1500;
+        overflow-y: auto;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+        display: none;
+    }
+    .orders-panel.show { display: block; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .orders-panel h3 { color: var(--accent); margin-bottom: 12px; font-size: 16px; display: flex; justify-content: space-between; align-items: center; }
+    .orders-panel .close-btn { background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+    .incoming-order { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 12px; margin-bottom: 10px; border-right: 4px solid var(--warning); }
+    .incoming-order.pending { border-right-color: var(--warning); }
+    .incoming-order.preparing { border-right-color: var(--info); }
+    .incoming-order.ready { border-right-color: var(--success); }
+    .incoming-order .order-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; }
+    .incoming-order .order-location { color: var(--accent); font-weight: bold; }
+    .incoming-order .order-time { color: #999; }
+    .incoming-order .order-items { font-size: 12px; margin-bottom: 10px; }
+    .incoming-order .order-item { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .incoming-order .order-total { font-weight: bold; color: var(--accent); margin-bottom: 10px; }
+    .incoming-order .order-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+    .incoming-order .order-actions button { flex: 1; padding: 6px; font-size: 11px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    .btn-status-pending { background: var(--warning); color: #000; }
+    .btn-status-preparing { background: var(--info); color: #fff; }
+    .btn-status-ready { background: var(--success); color: #fff; }
+    .btn-status-done { background: #555; color: #fff; }
+    .no-orders { text-align: center; color: #777; padding: 20px; font-size: 13px; }
+    .orders-toggle {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        background: var(--accent);
+        color: var(--primary);
+        border: none;
+        padding: 12px 18px;
+        border-radius: 50px;
+        font-weight: bold;
+        cursor: pointer;
+        z-index: 1400;
+        box-shadow: 0 4px 15px rgba(241,196,15,0.4);
+        display: none;
+    }
+    .orders-toggle.show { display: block; }
+    .orders-toggle .badge {
+        background: var(--danger);
+        color: #fff;
+        border-radius: 50%;
+        width: 22px;
+        height: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 6px;
+        font-size: 12px;
+    }
+    .cloud-status {
+        font-size: 10px;
+        padding: 3px 8px;
+        border-radius: 10px;
+        background: var(--success);
+        color: #fff;
+        display: inline-block;
+        margin-right: 8px;
+    }
+    .cloud-status.offline { background: var(--danger); }
 
     @media print {
         body * { visibility: hidden; }
@@ -224,12 +299,28 @@
 </head>
 <body>
 
-<div id="offlineBanner"> لا يوجد اتصال بالإنترنت — النظام يعمل محلياً</div>
+<div id="offlineBanner">️ لا يوجد اتصال بالإنترنت — النظام يعمل محلياً</div>
+
+<button class="orders-toggle" id="ordersToggle" onclick="toggleOrdersPanel()">
+    <span class="badge" id="ordersBadge">0</span>
+     الطلبات
+</button>
+
+<div class="orders-panel" id="ordersPanel">
+    <h3>
+        📋 الطلبات الواردة
+        <button class="close-btn" onclick="toggleOrdersPanel()">✕</button>
+    </h3>
+    <div id="ordersList"></div>
+</div>
 
 <div class="sidebar">
     <div class="logo-area">
         <h1>🧁 Gustavo Sweet & more</h1>
         <p>We are the happiness</p>
+        <div style="margin-top: 8px;">
+            <span class="cloud-status" id="cloudStatus">☁️ متصل بالسحابة</span>
+        </div>
     </div>
     <div class="zones" id="zoneButtons"></div>
     <div class="zone-config" id="zoneConfigRow">
@@ -240,7 +331,7 @@
     <button class="sidebar-btn" id="newTicketSidebarBtn" style="display:none;" onclick="newTakeawayTicket()">🧾 طلب تيك أواي جديد</button>
     <button class="sidebar-btn" onclick="openSettings()">⚙️ إدارة المنيو</button>
     <button class="sidebar-btn" onclick="openReport()">📊 تقرير المبيعات</button>
-    <button class="sidebar-btn danger" onclick="exportData()">💾 تصدير البيانات</button>
+    <button class="sidebar-btn" onclick="exportData()">💾 تصدير البيانات</button>
     <button class="sidebar-btn" onclick="document.getElementById('importFile').click()">📥 استيراد البيانات</button>
     <input type="file" id="importFile" style="display:none" accept=".json" onchange="importData(event)">
     <div class="sidebar-footer">
@@ -307,7 +398,7 @@
 <!-- Custom item modal -->
 <div id="customItemModal" class="modal-overlay">
     <div class="modal-content">
-        <h3> إضافة عنصر مخصص</h3>
+        <h3>➕ إضافة عنصر مخصص</h3>
         <input type="text" id="customItemName" placeholder="اسم المنتج">
         <input type="number" id="customItemPrice" placeholder="السعر (DA)">
         <div class="modal-actions">
@@ -335,7 +426,7 @@
 <!-- Settings modal -->
 <div id="settingsModal" class="modal-overlay">
     <div class="modal-content" style="width: 460px;">
-        <h3>️ الإعدادات</h3>
+        <h3>⚙️ الإعدادات</h3>
         <div class="tab-row">
             <button class="tab-btn active" onclick="switchSettingsTab('menu')">المنيو</button>
             <button class="tab-btn" onclick="switchSettingsTab('add')">إضافة/تعديل</button>
@@ -397,7 +488,7 @@
                 <span><span class="printer-dot" id="printerDot"></span><span id="printerStatusText">الطابعة: غير متصلة</span></span>
                 <button class="btn-confirm" style="width:auto; padding:8px 14px;" onclick="connectBluetoothPrinter()">🔌 اتصال</button>
             </div>
-            <div class="hint">طباعة تذكرة المطبخ عبر طابعة حرارية بلوتوث (ESC/POS) — تجريبي، يتطلب Chrome على أندرويد. أسماء المنتجات بالفرنسية/الإنجليزية تُطبع بشكل أفضل من العربية على أغلب الطابعات الحرارية.</div>
+            <div class="hint">طباعة تذكرة المطبخ عبر طابعة حرارية بلوتوث (ESC/POS) — تجريبي، يتطلب Chrome على أندرويد.</div>
         </div>
         <div class="modal-actions">
             <button class="btn-cancel" onclick="closeModal('settingsModal')">إغلاق</button>
@@ -439,7 +530,7 @@
     <div style="text-align: center; font-size: 10px; margin-top: 10px;">Soyez les bienvenus<br>Merci de votre visite! ❤️</div>
 </div>
 
-<!-- Kitchen ticket print template (no prices, bigger font for chefs) -->
+<!-- Kitchen ticket print template -->
 <div id="kitchen-print-area">
     <div style="text-align:center; font-weight:bold; font-size:20px;">*** CUISINE ***</div>
     <div id="kitchen-meta" style="text-align:center; font-weight:bold; font-size:16px; margin:6px 0;">Table 1</div>
@@ -451,8 +542,25 @@
 </div>
 
 <script>
-/* ==================== Gustavo POS - Advanced System ==================== */
-/* Version: 2.1 - Images (Cloudinary) + Kitchen printing (thermal BT + paper) */
+/* ==================== Gustavo POS - Cloud-Connected System ==================== */
+/* Version: 3.0 - Supabase Cloud Integration + Real-time Orders */
+
+// ============ SUPABASE CONFIGURATION ============
+const SUPABASE_URL = 'https://uvwjhciczohvufllgmac.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_hYoya1WlpuWhoLN7QsRyLA_XUmrxHvy';
+let supabaseClient = null;
+let cloudConnected = false;
+let ordersSubscription = null;
+let incomingOrders = [];
+
+try {
+    if (window.supabase) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('✅ Supabase client initialized');
+    }
+} catch (e) {
+    console.error('Supabase init error:', e);
+}
 
 const GUSTAVO_DEFAULT_MENU = [
     { id: 'g1', name: 'Scoop Cookies', price: 150, categoryKey: 'cat_cookies', extras: [], available: true, imageUrl: '' },
@@ -469,8 +577,8 @@ const GUSTAVO_DEFAULT_MENU = [
 
 const GUSTAVO_CATEGORIES = [
     { key: 'cat_cookies', emoji: '🍪', label: 'Cookies', order: 0 },
-    { key: 'cat_cakes', emoji: '', label: 'Cakes & Desserts', order: 1 },
-    { key: 'cat_crepes', emoji: '', label: 'Crêpes', order: 2 },
+    { key: 'cat_cakes', emoji: '🍰', label: 'Cakes & Desserts', order: 1 },
+    { key: 'cat_crepes', emoji: '🥞', label: 'Crêpes', order: 2 },
     { key: 'cat_drinks', emoji: '🥤', label: 'Boissons', order: 3 },
     { key: 'cat_special', emoji: '✨', label: 'Special Gustavo', order: 4 }
 ];
@@ -550,7 +658,6 @@ function migrateState(raw) {
     s.zones.takeaway.dynamic = true;
     if (!s.zones.takeaway.nextTicket) s.zones.takeaway.nextTicket = 1;
 
-    // ensure imageUrl field exists on every menu item (backward compatibility)
     s.menu.forEach(m => { if (typeof m.imageUrl === 'undefined') m.imageUrl = ''; });
 
     return s;
@@ -570,9 +677,59 @@ function loadState() {
 function saveState() {
     try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        // Upload to cloud in background (fire-and-forget)
+        uploadStateToCloud();
     } catch (e) {
         console.error('Save state error:', e);
         showToast('خطأ في الحفظ', 'error');
+    }
+}
+
+async function uploadStateToCloud() {
+    if (!supabaseClient || !cloudConnected) return;
+    try {
+        const payload = {
+            id: 'main',
+            data: {
+                categories: state.categories,
+                menu: state.menu,
+                config: state.config
+            }
+        };
+        await supabaseClient.from('pos_data').upsert(payload, { onConflict: 'id' });
+    } catch (e) {
+        console.warn('Cloud sync failed:', e);
+    }
+}
+
+async function loadStateFromCloud() {
+    if (!supabaseClient) return false;
+    try {
+        const { data, error } = await supabaseClient
+            .from('pos_data')
+            .select('data')
+            .eq('id', 'main')
+            .single();
+        
+        if (error || !data || !data.data) {
+            // First time: upload local state to cloud
+            await uploadStateToCloud();
+            return false;
+        }
+        
+        const cloudData = data.data;
+        if (cloudData.categories) state.categories = cloudData.categories;
+        if (cloudData.menu) state.menu = cloudData.menu;
+        if (cloudData.config) {
+            state.config = Object.assign({}, state.config, cloudData.config);
+            config = state.config;
+        }
+        cloudConnected = true;
+        updateCloudStatus();
+        return true;
+    } catch (e) {
+        console.error('Cloud load error:', e);
+        return false;
     }
 }
 
@@ -600,6 +757,216 @@ let pendingOptionsItem = null;
 let activeCategoryTab = null;
 let pendingUploadedImageUrl = '';
 
+/* ==================== Cloud Status ==================== */
+function updateCloudStatus() {
+    const el = document.getElementById('cloudStatus');
+    if (!el) return;
+    if (cloudConnected && navigator.onLine) {
+        el.textContent = '️ متصل بالسحابة';
+        el.classList.remove('offline');
+    } else {
+        el.textContent = '⚠️ وضع محلي';
+        el.classList.add('offline');
+    }
+}
+
+/* ==================== Real-time Orders Listener ==================== */
+function startOrdersListener() {
+    if (!supabaseClient) return;
+    
+    try {
+        // Unsubscribe previous if exists
+        if (ordersSubscription) {
+            supabaseClient.removeChannel(ordersSubscription);
+        }
+        
+        ordersSubscription = supabaseClient
+            .channel('orders_channel')
+            .on('postgres_changes', 
+                { event: 'INSERT', schema: 'public', table: 'orders' }, 
+                payload => {
+                    const newOrder = payload.new;
+                    if (newOrder.status === 'pending') {
+                        handleIncomingOrder(newOrder);
+                    }
+                }
+            )
+            .on('postgres_changes',
+                { event: 'UPDATE', schema: 'public', table: 'orders' },
+                payload => {
+                    const updatedOrder = payload.new;
+                    updateOrderInList(updatedOrder);
+                }
+            )
+            .subscribe();
+        
+        console.log('✅ Orders listener started');
+    } catch (e) {
+        console.error('Orders listener error:', e);
+    }
+}
+
+async function loadExistingOrders() {
+    if (!supabaseClient) return;
+    try {
+        const { data, error } = await supabaseClient
+            .from('orders')
+            .select('*')
+            .in('status', ['pending', 'preparing', 'ready'])
+            .order('created_at', { ascending: false })
+            .limit(50);
+        
+        if (!error && data) {
+            incomingOrders = data;
+            renderIncomingOrders();
+        }
+    } catch (e) {
+        console.error('Load orders error:', e);
+    }
+}
+
+function handleIncomingOrder(order) {
+    // Play notification sound
+    playNotificationSound();
+    
+    // Add to incoming orders
+    incomingOrders.unshift(order);
+    renderIncomingOrders();
+    
+    // Show toast
+    const location = order.zone ? order.zone.toUpperCase() : '';
+    const table = order.table || order.order_details?.table || '?';
+    showToast(`🔔 طلب جديد من ${location} - طاولة ${table}`, 'success');
+    
+    // Show orders panel briefly
+    const panel = document.getElementById('ordersPanel');
+    const toggle = document.getElementById('ordersToggle');
+    if (!panel.classList.contains('show')) {
+        toggle.classList.add('show');
+    }
+}
+
+function updateOrderInList(updatedOrder) {
+    const idx = incomingOrders.findIndex(o => o.id === updatedOrder.id);
+    if (idx !== -1) {
+        incomingOrders[idx] = updatedOrder;
+        renderIncomingOrders();
+    }
+}
+
+function playNotificationSound() {
+    try {
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIGGS57OihUBELTKXh8bllHAU2j9Xvz3kpBSh+zPDajzsKElyx6OyrWBUIQ5zd8sFuJAUuhM/z24k2CBhku+zooVARC0yl4fG5ZRwFNo/V7895KQUofsz');
+        audio.volume = 0.5;
+        audio.play().catch(() => {});
+    } catch (e) {}
+}
+
+function renderIncomingOrders() {
+    const list = document.getElementById('ordersList');
+    const badge = document.getElementById('ordersBadge');
+    const toggle = document.getElementById('ordersToggle');
+    
+    const pendingCount = incomingOrders.filter(o => o.status === 'pending').length;
+    badge.textContent = pendingCount;
+    
+    if (incomingOrders.length > 0) {
+        toggle.classList.add('show');
+    } else {
+        toggle.classList.remove('show');
+    }
+    
+    if (incomingOrders.length === 0) {
+        list.innerHTML = '<div class="no-orders">لا توجد طلبات واردة</div>';
+        return;
+    }
+    
+    list.innerHTML = incomingOrders.map(order => {
+        const details = order.order_details || {};
+        const items = details.items || [];
+        const total = details.total || 0;
+        const zone = order.zone || 'SALLE';
+        const table = order.table || '?';
+        const time = order.created_at ? new Date(order.created_at).toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'}) : '';
+        const status = order.status || 'pending';
+        
+        const statusLabels = {
+            'pending': ' قيد الانتظار',
+            'preparing': '👨‍🍳 قيد التحضير',
+            'ready': '✅ جاهز',
+            'completed': '✓ مكتمل'
+        };
+        
+        return `
+            <div class="incoming-order ${status}">
+                <div class="order-header">
+                    <span class="order-location">📍 ${zone.toUpperCase()} | طاولة ${table}</span>
+                    <span class="order-time">${time}</span>
+                </div>
+                <div class="order-items">
+                    ${items.map(item => `
+                        <div class="order-item">
+                            ${item.qty}x ${escapeHtml(item.name)}
+                            ${item.extras && item.extras.length ? `<small style="color:#999;"> (${item.extras.join(', ')})</small>` : ''}
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="order-total"> ${formatMoney(total)}</div>
+                <div style="font-size:11px; color:#999; margin-bottom:8px;">${statusLabels[status] || status}</div>
+                <div class="order-actions">
+                    ${status === 'pending' ? `<button class="btn-status-preparing" onclick="updateOrderStatus('${order.id}', 'preparing')">👨‍ تحضير</button>` : ''}
+                    ${status === 'preparing' ? `<button class="btn-status-ready" onclick="updateOrderStatus('${order.id}', 'ready')">✅ جاهز</button>` : ''}
+                    ${status === 'ready' ? `<button class="btn-status-done" onclick="updateOrderStatus('${order.id}', 'completed')">✓ إغلاق</button>` : ''}
+                    <button class="btn-status-done" onclick="deleteOrder('${order.id}')" style="background:var(--danger);">️</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+    if (!supabaseClient) {
+        showToast('⚠️ غير متصل بالسحابة', 'error');
+        return;
+    }
+    try {
+        const { error } = await supabaseClient
+            .from('orders')
+            .update({ status: newStatus })
+            .eq('id', orderId);
+        
+        if (error) throw error;
+        showToast(`✅ تم تحديث حالة الطلب`, 'success');
+    } catch (e) {
+        console.error('Update order error:', e);
+        showToast('❌ فشل التحديث', 'error');
+    }
+}
+
+async function deleteOrder(orderId) {
+    if (!confirm('حذف هذا الطلب؟')) return;
+    if (!supabaseClient) return;
+    try {
+        const { error } = await supabaseClient
+            .from('orders')
+            .delete()
+            .eq('id', orderId);
+        
+        if (error) throw error;
+        incomingOrders = incomingOrders.filter(o => o.id !== orderId);
+        renderIncomingOrders();
+        showToast('🗑️ تم حذف الطلب', 'success');
+    } catch (e) {
+        console.error('Delete order error:', e);
+        showToast('❌ فشل الحذف', 'error');
+    }
+}
+
+function toggleOrdersPanel() {
+    const panel = document.getElementById('ordersPanel');
+    panel.classList.toggle('show');
+}
+
 /* ==================== Toast Notifications ==================== */
 function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
@@ -617,10 +984,12 @@ function showToast(message, type = 'info') {
 /* ==================== Network Handling ==================== */
 function updateNetworkBanner() {
     document.getElementById('offlineBanner').classList.toggle('show', !navigator.onLine);
+    updateCloudStatus();
 }
 window.addEventListener('online', () => {
     updateNetworkBanner();
     showToast('✅ عاد الاتصال بالإنترنت', 'success');
+    loadStateFromCloud();
 });
 window.addEventListener('offline', () => {
     updateNetworkBanner();
@@ -688,7 +1057,7 @@ function renderZoneButtons() {
     Object.keys(state.zones).forEach(key => {
         const btn = document.createElement('button');
         btn.className = 'zone-btn' + (key === currentZone ? ' active' : '');
-        btn.innerText = key === 'salle' ? ' SALLE' : key === 'terrasse' ? '🌿 TERRASSE' : '📦 TAKEAWAY';
+        btn.innerText = key === 'salle' ? '🍽️ SALLE' : key === 'terrasse' ? '🌿 TERRASSE' : '📦 TAKEAWAY';
         btn.onclick = () => switchZone(key);
         container.appendChild(btn);
     });
@@ -1098,7 +1467,7 @@ function downloadTableQRPoster() {
         docPdf.text('Scan for digital menu', 105, 148, { align: 'center' });
 
         docPdf.save(`Gustavo-QR-${currentZone}-${activeTable}.pdf`);
-        showToast('📄 تم تحميل PDF', 'success');
+        showToast(' تم تحميل PDF', 'success');
     }, 300);
 }
 
@@ -1127,7 +1496,7 @@ function sendToKitchen() {
     msg += `\n💰 *المجموع: ${tableTotal(t).toFixed(2)} DA*`;
 
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
-    showToast('📱 تم فتح واتساب المطبخ', 'success');
+    showToast(' تم فتح واتساب المطبخ', 'success');
 }
 
 function sendWhatsAppConfirmation() {
@@ -1144,8 +1513,7 @@ function sendWhatsAppConfirmation() {
         return;
     }
 
-    const phone = config.customerPhone || '213781006798';
-    let msg = `🧁 *Gustavo Sweet & more*\n\n`;
+    let msg = ` *Gustavo Sweet & more*\n\n`;
     msg += `مرحباً ${t.customerName || 'عزيزي الزبون'}،\n`;
     msg += `تفاصيل طلبك:\n\n`;
 
@@ -1160,10 +1528,10 @@ function sendWhatsAppConfirmation() {
     msg += `\nشكراً لثقتكم! ❤️`;
 
     window.open(`https://wa.me/${cleaned}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
-    showToast(' تم إرسال التأكيد', 'success');
+    showToast('✅ تم إرسال التأكيد', 'success');
 }
 
-/* ==================== Printing (customer receipt) ==================== */
+/* ==================== Printing ==================== */
 function fillReceipt(zone, table, order, total, customerName) {
     const label = zone === 'takeaway' ?
         `Type: TAKEAWAY | Ticket: #${table}` :
@@ -1202,7 +1570,6 @@ function printOrder() {
     showToast('🖨️ جاري طباعة إيصال الزبون...', 'success');
 }
 
-/* ==================== Kitchen ticket (no prices, for chefs) ==================== */
 function fillKitchenTicket(zone, table, order, customerName) {
     const label = zone === 'takeaway' ? `TAKEAWAY — Ticket #${table}` : `${zone.toUpperCase()} — Table ${table}`;
     document.getElementById('kitchen-meta').innerText = label;
@@ -1234,10 +1601,9 @@ function printKitchenTicket() {
     window.print();
     setTimeout(() => document.body.classList.remove('print-kitchen'), 500);
 
-    // Also try the Bluetooth thermal printer if one is connected
     sendKitchenTicketToBluetoothPrinter(currentZone, activeTable, t.order, t.customerName);
 
-    showToast('🖨️👨‍🍳 جاري إرسال تذكرة المطبخ...', 'success');
+    showToast('🖨️👨🍳 جاري إرسال تذكرة المطبخ...', 'success');
 }
 
 function checkoutTable() {
@@ -1283,10 +1649,9 @@ function checkoutTable() {
     showToast('✅ تم التحصيل وإغلاق الطاولة', 'success');
 }
 
-/* ==================== Bluetooth thermal printer (ESC/POS) ==================== */
+/* ==================== Bluetooth thermal printer ==================== */
 let btPrinterDevice = null;
 let btPrinterCharacteristic = null;
-// Common thermal printer BLE service/characteristic UUIDs (works with many generic 58/80mm ESC/POS printers)
 const BT_PRINTER_SERVICE_UUID = '000018f0-0000-1000-8000-00805f9b34fb';
 const BT_PRINTER_CHAR_UUID = '00002af1-0000-1000-8000-00805f9b34fb';
 
@@ -1305,7 +1670,7 @@ function updatePrinterStatusUI() {
 
 async function connectBluetoothPrinter() {
     if (!navigator.bluetooth) {
-        showToast('⚠️ المتصفح لا يدعم Web Bluetooth (استخدم Chrome على أندرويد)', 'error');
+        showToast('️ المتصفح لا يدعم Web Bluetooth', 'error');
         return;
     }
     try {
@@ -1328,25 +1693,22 @@ async function connectBluetoothPrinter() {
         showToast('✅ تم الاتصال بالطابعة: ' + (device.name || ''), 'success');
     } catch (e) {
         console.error(e);
-        showToast('❌ تعذر الاتصال بالطابعة (تأكد أنها طابعة ESC/POS متوافقة مع BLE)', 'error');
+        showToast('❌ تعذر الاتصال بالطابعة', 'error');
     }
 }
 
-// Minimal ESC/POS byte builder. Arabic text is not supported by most thermal
-// printer firmwares over this simple codepage, so kitchen tickets print best
-// with Latin-script item names (French/English), which is how this menu is set up.
 function escposBuildKitchenTicket(zone, table, order, customerName) {
     const enc = new TextEncoder();
     let bytes = [];
     const push = (...b) => { bytes.push(...b); };
     const text = (str, opts = {}) => {
-        push(0x1B, 0x45, opts.bold ? 0x01 : 0x00);           // bold on/off
-        push(0x1D, 0x21, opts.big ? 0x11 : 0x00);            // double width+height
-        push(0x1B, 0x61, opts.center ? 0x01 : 0x00);         // align center/left
+        push(0x1B, 0x45, opts.bold ? 0x01 : 0x00);
+        push(0x1D, 0x21, opts.big ? 0x11 : 0x00);
+        push(0x1B, 0x61, opts.center ? 0x01 : 0x00);
         push(...Array.from(enc.encode(str + '\n')));
     };
 
-    push(0x1B, 0x40); // init
+    push(0x1B, 0x40);
     text('*** CUISINE ***', { bold: true, big: true, center: true });
     const label = zone === 'takeaway' ? ('Ticket #' + table) : (zone.toUpperCase() + ' - Table ' + table);
     text(label, { bold: true, center: true });
@@ -1360,19 +1722,19 @@ function escposBuildKitchenTicket(zone, table, order, customerName) {
         }
     });
     text('--------------------------------', {});
-    push(0x1B, 0x64, 0x04); // feed 4 lines
+    push(0x1B, 0x64, 0x04);
     return new Uint8Array(bytes);
 }
 
 async function sendKitchenTicketToBluetoothPrinter(zone, table, order, customerName) {
-    if (!btPrinterCharacteristic) return; // no thermal printer connected — silently skip
+    if (!btPrinterCharacteristic) return;
     try {
         const data = escposBuildKitchenTicket(zone, table, order, customerName);
-        const chunkSize = 100; // BLE writes need to be chunked, most stacks cap around 20-180 bytes
+        const chunkSize = 100;
         for (let i = 0; i < data.length; i += chunkSize) {
             await btPrinterCharacteristic.writeValue(data.slice(i, i + chunkSize));
         }
-        showToast('🖨️ تم الإرسال للطابعة الحرارية', 'success');
+        showToast('️ تم الإرسال للطابعة الحرارية', 'success');
     } catch (e) {
         console.error(e);
         showToast('❌ فشل الإرسال للطابعة الحرارية', 'error');
@@ -1385,7 +1747,7 @@ function handleMenuImageUpload(event) {
     if (!file) return;
 
     if (!config.cloudinaryCloudName || !config.cloudinaryUploadPreset) {
-        showToast('⚠️ أدخل Cloudinary Cloud Name و Upload Preset أولاً من تبويب الإعدادات', 'error');
+        showToast('⚠️ أدخل Cloudinary Cloud Name و Upload Preset أولاً', 'error');
         event.target.value = '';
         return;
     }
@@ -1411,13 +1773,13 @@ function handleMenuImageUpload(event) {
             statusEl.innerText = '✅ تم رفع الصورة بنجاح';
             showToast('✅ تم رفع الصورة', 'success');
         } else {
-            statusEl.innerText = '❌ فشل الرفع: تحقق من Cloud Name / Upload Preset';
+            statusEl.innerText = '❌ فشل الرفع';
             showToast('❌ فشل رفع الصورة', 'error');
         }
     })
     .catch(err => {
         console.error(err);
-        statusEl.innerText = '❌ خطأ في الاتصال بـ Cloudinary';
+        statusEl.innerText = '❌ خطأ في الاتصال';
         showToast('❌ خطأ في رفع الصورة', 'error');
     });
 }
@@ -1452,9 +1814,10 @@ function switchSettingsTab(tab) {
     ['menu', 'add', 'cat', 'config'].forEach(id => {
         document.getElementById('tab' + id.charAt(0).toUpperCase() + id.slice(1))
             .classList.toggle('active', tab === id);
-        const btn = document.querySelector(`button[onclick="switchSettingsTab('${tab}')"]`);
-        if (btn) {
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    });
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.onclick && btn.onclick.toString().includes(`'${tab}'`)) {
             btn.classList.add('active');
         }
     });
@@ -1536,7 +1899,7 @@ function updateCatEmoji(idx, val) {
 function addNewCategory() {
     const emojiInput = document.getElementById('newCategoryEmoji');
     const nameInput = document.getElementById('newCategoryName');
-    const emoji = emojiInput.value.trim() || '️';
+    const emoji = emojiInput.value.trim() || '🍽️';
     const name = nameInput.value.trim();
 
     if (!name) {
@@ -1661,7 +2024,7 @@ function renderMenuManageList() {
                     onclick="toggleMenuItemAvailability('${item.id}')">
                 ${item.available ? '⏸️' : '▶️'}
             </button>
-            <button title="تعديل" onclick="startEditMenuItem('${item.id}')">✏️</button>
+            <button title="تعديل" onclick="startEditMenuItem('${item.id}')">️</button>
             <button title="حذف" class="danger" onclick="deleteMenuItem('${item.id}')">🗑️</button>
         </div>`;
     }).join('');
@@ -1835,7 +2198,7 @@ function openReport() {
 }
 
 function clearReport() {
-    if (!confirm('⚠️ هل أنت متأكد من مسح تقرير اليوم؟')) return;
+    if (!confirm('️ هل أنت متأكد من مسح تقرير اليوم؟')) return;
     state.sales = state.sales.filter(s => !isToday(s.date));
     saveState();
     openReport();
@@ -1886,8 +2249,17 @@ if ('serviceWorker' in navigator) {
 }
 
 /* ==================== Initialization ==================== */
-function init() {
+async function init() {
     updateNetworkBanner();
+    
+    // Try to load from cloud first
+    const cloudLoaded = await loadStateFromCloud();
+    if (cloudLoaded) {
+        console.log('✅ Data loaded from cloud');
+    } else {
+        console.log('️ Using local data');
+    }
+    
     renderZoneButtons();
     const z = state.zones[currentZone];
     document.getElementById('zone-title').innerText = 'إدارة ' + z.label;
@@ -1900,9 +2272,16 @@ function init() {
     renderTables();
     updateOrderUI();
     updatePrinterStatusUI();
+    updateCloudStatus();
 
     document.getElementById('menuSearch').addEventListener('input', debounce(renderMenuButtons, 200));
     setInterval(renderTables, 30000);
+
+    // Start real-time orders listener
+    if (supabaseClient) {
+        startOrdersListener();
+        loadExistingOrders();
+    }
 
     showToast(' Gustavo POS جاهز!', 'success');
 }
@@ -1910,4 +2289,4 @@ function init() {
 init();
 </script>
 </body>
-</html>
+    </html>
