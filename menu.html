@@ -7,13 +7,13 @@
 <title>Gustavo Sweet & more - المنيو الرقمي</title>
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-    body { 
-        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); 
-        color: #fff; 
+    body {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        color: #fff;
         min-height: 100vh;
         padding-bottom: 100px;
     }
-    
+
     .header {
         background: linear-gradient(135deg, #4A235A 0%, #6c3483 100%);
         padding: 30px 20px;
@@ -32,7 +32,7 @@
         font-size: 16px;
         font-weight: bold;
     }
-    
+
     .category-section { margin: 25px 15px; }
     .category-title {
         color: #F1C40F;
@@ -44,7 +44,7 @@
         align-items: center;
         gap: 10px;
     }
-    
+
     .menu-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
     .menu-item {
         background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
@@ -53,18 +53,36 @@
         padding: 18px;
         transition: all 0.3s;
         cursor: pointer;
+        overflow: hidden;
     }
     .menu-item:hover {
         border-color: #F1C40F;
         transform: translateY(-3px);
         box-shadow: 0 8px 20px rgba(241,196,15,0.2);
     }
+    .item-img {
+        width: calc(100% + 36px);
+        margin: -18px -18px 12px -18px;
+        height: 150px;
+        object-fit: cover;
+        display: block;
+    }
+    .item-img-placeholder {
+        width: calc(100% + 36px);
+        margin: -18px -18px 12px -18px;
+        height: 90px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 34px;
+        background: rgba(255,255,255,0.04);
+    }
     .item-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px; }
     .item-name { font-size: 16px; font-weight: bold; color: #fff; }
-    .item-price { color: #F1C40F; font-size: 18px; font-weight: bold; }
-    .item-extras { 
-        font-size: 12px; 
-        color: #999; 
+    .item-price { color: #F1C40F; font-size: 18px; font-weight: bold; white-space: nowrap; }
+    .item-extras {
+        font-size: 12px;
+        color: #999;
         margin-top: 8px;
         padding-top: 8px;
         border-top: 1px solid #404040;
@@ -77,7 +95,7 @@
         border-radius: 12px;
         font-size: 11px;
     }
-    
+
     .cart-bar {
         position: fixed;
         bottom: 0;
@@ -109,7 +127,7 @@
         transition: all 0.2s;
     }
     .cart-btn:hover { transform: scale(1.05); }
-    
+
     .modal {
         display: none;
         position: fixed;
@@ -130,6 +148,13 @@
         max-width: 400px;
         max-height: 80vh;
         overflow-y: auto;
+    }
+    .modal-content .modal-item-img {
+        width: calc(100% + 60px);
+        margin: -30px -30px 15px -30px;
+        height: 160px;
+        object-fit: cover;
+        display: block;
     }
     .modal-title { color: #F1C40F; font-size: 20px; margin-bottom: 20px; text-align: center; }
     .modifier-option {
@@ -174,7 +199,7 @@
     }
     .btn-cancel { background: #555; color: #fff; }
     .btn-confirm { background: #F1C40F; color: #4A235A; }
-    
+
     .empty-msg { text-align: center; color: #777; padding: 40px; font-size: 16px; }
 </style>
 </head>
@@ -198,6 +223,7 @@
 
 <div class="modal" id="itemModal">
     <div class="modal-content">
+        <img class="modal-item-img" id="modalItemImg" style="display:none;" src="">
         <h3 class="modal-title" id="modalTitle">تخصيص الطلب</h3>
         <div id="modalBody"></div>
         <div class="qty-selector">
@@ -240,7 +266,6 @@ let currentItem = null;
 let currentQty = 1;
 let currentExtras = [];
 
-// Load menu from localStorage (shared with POS)
 function loadMenu() {
     try {
         const state = JSON.parse(localStorage.getItem('gustavo_pos_v3'));
@@ -250,44 +275,54 @@ function loadMenu() {
     }
 }
 
+function loadKitchenPhone() {
+    try {
+        const cfg = JSON.parse(localStorage.getItem('gustavo_config'));
+        return (cfg && cfg.kitchenPhone) ? cfg.kitchenPhone : '213781006798';
+    } catch (e) {
+        return '213781006798';
+    }
+}
+
 function formatMoney(n) {
     return Number(n).toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' DA';
 }
 
 function escapeHtml(str) {
     const div = document.createElement('div');
-    div.textContent = str;
+    div.textContent = str === null || str === undefined ? '' : String(str);
     return div.innerHTML;
 }
 
 function init() {
     const data = loadMenu();
     if (!data) {
-        document.getElementById('menuContainer').innerHTML = 
-            '<div class="empty-msg">⚠️ تعذر تحميل المنيو. تأكد من فتح النظام من الطاولة.</div>';
+        document.getElementById('menuContainer').innerHTML =
+            '<div class="empty-msg">⚠️ تعذر تحميل المنيو. تأكد من فتح النظام من الطاولة (على نفس الجهاز/المتصفح).</div>';
         return;
     }
-    
-    // Show table info
+
     const zoneLabel = zone === 'salle' ? 'SALLE' : zone === 'terrasse' ? 'TERRASSE' : 'TAKEAWAY';
-    document.getElementById('tableInfo').innerHTML = 
-        ` ${zoneLabel} | 🪑 الطاولة: ${table}`;
-    
-    // Group by category
+    document.getElementById('tableInfo').innerHTML =
+        ` ${zoneLabel} | 🪑 الطاولة: ${escapeHtml(table)}`;
+
     const categories = data.categories;
     const menu = data.menu.filter(m => m.available);
-    
+
     let html = '';
     categories.forEach(cat => {
         const catItems = menu.filter(m => m.categoryKey === cat.key);
         if (catItems.length === 0) return;
-        
+
         html += `
             <div class="category-section">
                 <div class="category-title">${escapeHtml(cat.emoji || '🍽️')} ${escapeHtml(cat.label)}</div>
                 <div class="menu-grid">
                     ${catItems.map(item => `
-                        <div class="menu-item" onclick="openItem(${item.id})">
+                        <div class="menu-item" onclick="openItem('${item.id}')">
+                            ${item.imageUrl
+                                ? `<img class="item-img" src="${escapeHtml(item.imageUrl)}" loading="lazy" alt="${escapeHtml(item.name)}">`
+                                : `<div class="item-img-placeholder">🍽️</div>`}
                             <div class="item-header">
                                 <div class="item-name">${escapeHtml(item.name)}</div>
                                 <div class="item-price">${item.price} DA</div>
@@ -296,7 +331,7 @@ function init() {
                                 <div class="item-extras">
                                     <div>الإضافات المتاحة:</div>
                                     <div class="extras-list">
-                                        ${item.extras.map(e => 
+                                        ${item.extras.map(e =>
                                             `<span class="extra-tag">${escapeHtml(e.name)} +${e.price} DA</span>`
                                         ).join('')}
                                     </div>
@@ -308,8 +343,8 @@ function init() {
             </div>
         `;
     });
-    
-    document.getElementById('menuContainer').innerHTML = html || 
+
+    document.getElementById('menuContainer').innerHTML = html ||
         '<div class="empty-msg">لا توجد منتجات متاحة حالياً</div>';
 }
 
@@ -317,13 +352,21 @@ function openItem(id) {
     const data = loadMenu();
     const item = data.menu.find(m => m.id === id);
     if (!item) return;
-    
+
     currentItem = item;
     currentQty = 1;
     currentExtras = [];
-    
+
     document.getElementById('modalTitle').innerText = item.name;
-    
+
+    const imgEl = document.getElementById('modalItemImg');
+    if (item.imageUrl) {
+        imgEl.src = item.imageUrl;
+        imgEl.style.display = 'block';
+    } else {
+        imgEl.style.display = 'none';
+    }
+
     let body = '';
     if (item.extras.length > 0) {
         body = '<div style="margin: 15px 0;">';
@@ -342,7 +385,7 @@ function openItem(id) {
     } else {
         body = '<p style="text-align: center; color: #999; padding: 20px;">لا توجد إضافات</p>';
     }
-    
+
     document.getElementById('modalBody').innerHTML = body;
     document.getElementById('modalQty').innerText = '1';
     document.getElementById('itemModal').classList.add('show');
@@ -351,7 +394,7 @@ function openItem(id) {
 function toggleExtra(idx, price) {
     const cb = document.querySelector(`input[data-idx="${idx}"]`);
     const extra = currentItem.extras[idx];
-    
+
     if (cb.checked) {
         currentExtras.push(extra);
     } else {
@@ -371,16 +414,16 @@ function closeModal() {
 
 function addToCart() {
     if (!currentItem) return;
-    
+
     const extrasTotal = currentExtras.reduce((sum, e) => sum + e.price, 0);
     const unitPrice = currentItem.price + extrasTotal;
-    
-    const existing = cart.find(item => 
-        item.id === currentItem.id && 
-        JSON.stringify(item.extras.map(e => e.name).sort()) === 
+
+    const existing = cart.find(item =>
+        item.id === currentItem.id &&
+        JSON.stringify(item.extras.map(e => e.name).sort()) ===
         JSON.stringify(currentExtras.map(e => e.name).sort())
     );
-    
+
     if (existing) {
         existing.qty += currentQty;
     } else {
@@ -393,24 +436,18 @@ function addToCart() {
             qty: currentQty
         });
     }
-    
+
     closeModal();
     updateCart();
-    
-    // Show feedback
-    const btn = event.target;
-    const originalText = btn.innerText;
-    btn.innerText = '✅ تمت الإضافة';
-    setTimeout(() => btn.innerText = originalText, 1500);
 }
 
 function updateCart() {
     const total = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
     const count = cart.reduce((sum, item) => sum + item.qty, 0);
-    
+
     document.getElementById('cartTotal').innerText = formatMoney(total);
     document.getElementById('cartCount').innerText = count;
-    
+
     if (cart.length > 0) {
         document.getElementById('cartBar').classList.add('show');
     } else {
@@ -420,15 +457,15 @@ function updateCart() {
 
 function showCart() {
     const total = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
-    
+
     let html = '';
     cart.forEach((item, idx) => {
-        const extrasText = item.extras.length > 0 ? 
-            `<br><small style="color: #999;">${item.extras.map(e => e.name).join(', ')}</small>` : '';
-        
+        const extrasText = item.extras.length > 0 ?
+            `<br><small style="color: #999;">${escapeHtml(item.extras.map(e => e.name).join(', '))}</small>` : '';
+
         html += `
-            <div style="display: flex; justify-content: space-between; align-items: center; 
-                        padding: 12px; margin: 8px 0; background: rgba(255,255,255,0.05); 
+            <div style="display: flex; justify-content: space-between; align-items: center;
+                        padding: 12px; margin: 8px 0; background: rgba(255,255,255,0.05);
                         border-radius: 8px;">
                 <div style="flex: 1;">
                     <div style="font-weight: bold;">${escapeHtml(item.name)} x${item.qty}</div>
@@ -437,14 +474,14 @@ function showCart() {
                 <div style="color: #F1C40F; font-weight: bold;">
                     ${formatMoney(item.unitPrice * item.qty)}
                 </div>
-                <button onclick="removeFromCart(${idx})" 
-                        style="background: #E74C3C; color: #fff; border: none; 
-                               width: 30px; height: 30px; border-radius: 6px; 
+                <button onclick="removeFromCart(${idx})"
+                        style="background: #E74C3C; color: #fff; border: none;
+                               width: 30px; height: 30px; border-radius: 6px;
                                cursor: pointer; margin-right: 10px;">✕</button>
             </div>
         `;
     });
-    
+
     document.getElementById('cartItems').innerHTML = html;
     document.getElementById('cartTotalModal').innerText = formatMoney(total);
     document.getElementById('cartModal').classList.add('show');
@@ -462,32 +499,29 @@ function closeCart() {
 
 function sendOrder() {
     if (cart.length === 0) return;
-    
+
     const total = cart.reduce((sum, item) => sum + (item.unitPrice * item.qty), 0);
-    
+
     let msg = `📋 *طلب جديد من الطاولة*\n\n`;
     msg += ` ${zone.toUpperCase()} | طاولة ${table}\n\n`;
     msg += `*الطلب:*\n`;
-    
+
     cart.forEach((item, idx) => {
-        const extrasText = item.extras.length > 0 ? 
+        const extrasText = item.extras.length > 0 ?
             ` (${item.extras.map(e => e.name).join(', ')})` : '';
         msg += `${idx + 1}. ${item.name}${extrasText} x${item.qty} — ${formatMoney(item.unitPrice * item.qty)}\n`;
     });
-    
+
     msg += `\n💰 *المجموع: ${formatMoney(total)}*`;
-    
-    // Open WhatsApp with order
-    const phone = '213781006798'; // Gustavo's number
+
+    const phone = loadKitchenPhone();
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-    
-    // Clear cart after sending
+
     cart = [];
     updateCart();
     closeCart();
 }
 
-// Close modals on outside click
 document.querySelectorAll('.modal').forEach(modal => {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
@@ -496,7 +530,6 @@ document.querySelectorAll('.modal').forEach(modal => {
     });
 });
 
-// Initialize
 init();
 </script>
 </body>
