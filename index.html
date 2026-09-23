@@ -21,15 +21,15 @@
         --panel: #1a1a1a;
         --card: #2d2d2d;
         --border: #404040;
+        --info: #3498DB;
+        --kitchen: #9b59b6;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: #fff; display: flex; height: 100vh; overflow: hidden; }
-    
-    /* Offline banner */
+
     #offlineBanner { display: none; position: fixed; top: 0; left: 0; right: 0; background: var(--danger); color: #fff; text-align: center; font-size: 12px; font-weight: bold; padding: 6px; z-index: 3000; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
     #offlineBanner.show { display: block; }
-    
-    /* Sidebar */
+
     .sidebar { width: 280px; background: var(--primary); display: flex; flex-direction: column; border-left: 4px solid var(--accent); padding: 20px; box-shadow: 4px 0 15px rgba(0,0,0,0.3); }
     .logo-area { text-align: center; margin-bottom: 20px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; }
     .logo-area h1 { font-size: 24px; color: var(--accent); margin-bottom: 5px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
@@ -45,8 +45,7 @@
     .sidebar-btn.danger { background: rgba(231,76,60,0.2); border-color: var(--danger); }
     .sidebar-btn.danger:hover { background: rgba(231,76,60,0.3); }
     .sidebar-footer { margin-top: auto; font-size: 11px; color: #999; text-align: center; padding: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
-    
-    /* Main tables area */
+
     .main-content { flex: 1; padding: 25px; overflow-y: auto; background: linear-gradient(135deg, #2a2a2a 0%, #1f1f1f 100%); }
     .main-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 12px; }
     #zone-title { color: var(--accent); font-size: 22px; font-weight: bold; }
@@ -64,9 +63,8 @@
     .table-timer { font-size: 10px; color: #ddd; margin-top: 3px; background: rgba(0,0,0,0.3); padding: 2px 8px; border-radius: 10px; }
     .new-ticket-card { border: 3px dashed var(--accent); background: rgba(241,196,15,0.1); color: var(--accent); font-weight: bold; font-size: 14px; }
     .new-ticket-card:hover { background: rgba(241,196,15,0.2); }
-    
-    /* Order panel */
-    .order-panel { width: 420px; background: var(--panel); border-right: 3px solid var(--border); display: flex; flex-direction: column; padding: 20px; box-shadow: -4px 0 15px rgba(0,0,0,0.3); }
+
+    .order-panel { width: 420px; background: var(--panel); border-right: 3px solid var(--border); display: flex; flex-direction: column; padding: 20px; box-shadow: -4px 0 15px rgba(0,0,0,0.3); overflow-y: auto; }
     .panel-header { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid var(--border); }
     #selected-table-title { font-size: 18px; color: var(--accent); font-weight: bold; }
     .takeaway-fields { display: none; margin-top: 12px; }
@@ -74,24 +72,28 @@
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .takeaway-fields input { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 8px; border: 1px solid var(--border); background: #2d2d2d; color: #fff; font-size: 13px; }
     .takeaway-fields input:focus { outline: none; border-color: var(--accent); }
-    
+
     .search-box { margin: 12px 0; }
     .search-box input { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid var(--border); background: #2d2d2d; color: #fff; font-size: 14px; }
     .search-box input:focus { outline: none; border-color: var(--accent); }
-    
+
     .category-tabs { display: flex; gap: 8px; overflow-x: auto; margin: 12px 0; padding-bottom: 6px; scrollbar-width: none; }
     .category-tabs::-webkit-scrollbar { display: none; }
     .category-tab { flex: 0 0 auto; border: 2px solid var(--border); background: var(--card); color: #ccc; border-radius: 20px; padding: 8px 16px; font-size: 13px; font-weight: bold; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
     .category-tab:hover { border-color: var(--accent); }
     .category-tab.active { background: var(--accent); color: var(--primary); border-color: var(--accent); box-shadow: 0 3px 10px rgba(241,196,15,0.3); }
-    
-    .menu-selector { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 12px 0; max-height: 180px; overflow-y: auto; padding: 5px; }
-    .menu-item-btn { background: linear-gradient(135deg, #3a3a3a 0%, #2d2d2d 100%); border: 2px solid var(--border); color: #fff; padding: 12px 8px; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: center; line-height: 1.3; position: relative; transition: all 0.2s; }
-    .menu-item-btn:hover { background: linear-gradient(135deg, var(--accent) 0%, #f39c12 100%); color: var(--primary); border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(241,196,15,0.3); }
-    .menu-item-btn .extras-flag { position: absolute; top: 5px; left: 8px; font-size: 12px; }
-    .custom-item-btn { grid-column: span 2; background: rgba(241,196,15,0.15); border: 2px dashed var(--accent); color: var(--accent); }
+
+    .menu-selector { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin: 12px 0; max-height: 220px; overflow-y: auto; padding: 5px; }
+    .menu-item-btn { background: linear-gradient(135deg, #3a3a3a 0%, #2d2d2d 100%); border: 2px solid var(--border); color: #fff; padding: 0; border-radius: 10px; cursor: pointer; font-size: 13px; text-align: center; line-height: 1.3; position: relative; transition: all 0.2s; overflow: hidden; }
+    .menu-item-btn:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(241,196,15,0.3); }
+    .menu-item-btn .item-thumb { width: 100%; height: 64px; object-fit: cover; display: block; background: #222; }
+    .menu-item-btn .item-thumb-placeholder { width: 100%; height: 64px; display: flex; align-items: center; justify-content: center; font-size: 24px; background: rgba(255,255,255,0.04); }
+    .menu-item-btn .item-label { padding: 8px 6px 10px; display: block; }
+    .menu-item-btn:hover .item-label { background: linear-gradient(135deg, var(--accent) 0%, #f39c12 100%); color: var(--primary); }
+    .menu-item-btn .extras-flag { position: absolute; top: 5px; left: 8px; font-size: 12px; z-index: 2; }
+    .custom-item-btn { grid-column: span 2; background: rgba(241,196,15,0.15); border: 2px dashed var(--accent); color: var(--accent); padding: 12px 8px; }
     .empty-menu-note { grid-column: span 2; color: #777; text-align: center; font-size: 13px; padding: 15px; }
-    
+
     .order-items { flex: 1; overflow-y: auto; margin: 15px 0; border-top: 2px solid var(--border); border-bottom: 2px solid var(--border); padding: 12px 0; min-height: 100px; background: rgba(0,0,0,0.2); border-radius: 8px; }
     .item-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 13px; gap: 8px; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 8px; transition: all 0.2s; }
     .item-row:hover { background: rgba(255,255,255,0.1); }
@@ -106,7 +108,7 @@
     .remove-btn { background: none; border: none; color: var(--danger); cursor: pointer; font-size: 18px; transition: all 0.2s; }
     .remove-btn:hover { transform: scale(1.2); }
     .empty-cart { color: #777; text-align: center; margin-top: 30px; font-size: 14px; }
-    
+
     .total-row { display: flex; justify-content: space-between; font-size: 22px; font-weight: bold; margin: 15px 0; padding: 15px; background: linear-gradient(135deg, rgba(241,196,15,0.2) 0%, rgba(241,196,15,0.05) 100%); border-radius: 10px; border: 2px solid var(--accent); }
     .action-btn { padding: 14px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; border: none; transition: all 0.3s; margin-bottom: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
     .action-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.3); }
@@ -115,9 +117,9 @@
     .qr-btn { background: linear-gradient(135deg, var(--warning) 0%, #f39c12 100%); color: #000; }
     .wa-btn { background: linear-gradient(135deg, #25d366 0%, #128c7e 100%); color: #fff; }
     .kitchen-btn { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); color: #fff; }
+    .kitchen-print-btn { background: linear-gradient(135deg, #16a085 0%, #1abc9c 100%); color: #fff; }
     .action-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-    
-    /* Modals */
+
     .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); justify-content: center; align-items: center; z-index: 1000; padding: 20px; backdrop-filter: blur(5px); }
     .modal-overlay.open { display: flex; animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -133,16 +135,17 @@
     .btn-confirm { background: var(--accent); color: var(--primary); }
     .btn-danger { background: var(--danger); color: #fff; }
     .hint { font-size: 11px; color: #999; margin: -8px 0 12px; text-align: right; }
-    
+
     .settings-list { text-align: right; font-size: 13px; margin-bottom: 12px; }
-    .settings-list .row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 8px; gap: 8px; }
+    .settings-list .row { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; margin-bottom: 8px; gap: 8px; }
+    .settings-list .row .thumb { width: 38px; height: 38px; border-radius: 6px; object-fit: cover; background: #222; flex-shrink: 0; }
     .settings-list .row .info { flex: 1; text-align: right; }
     .settings-list .row .info .unavail { color: var(--danger); font-size: 10px; }
     .settings-list .row button { background: none; border: none; color: #ccc; cursor: pointer; font-size: 16px; transition: all 0.2s; }
     .settings-list .row button:hover { transform: scale(1.2); }
     .settings-list .row button.danger { color: var(--danger); }
-    .tab-row { display: flex; gap: 8px; margin-bottom: 20px; }
-    .tab-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; background: var(--card); color: #fff; cursor: pointer; font-size: 13px; transition: all 0.2s; }
+    .tab-row { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .tab-btn { flex: 1; padding: 10px; border-radius: 8px; border: none; background: var(--card); color: #fff; cursor: pointer; font-size: 13px; transition: all 0.2s; min-width: 70px; }
     .tab-btn:hover { background: #555; }
     .tab-btn.active { background: var(--accent); color: var(--primary); font-weight: bold; }
     .tab-panel { display: none; text-align: right; }
@@ -153,8 +156,7 @@
     .report-stat { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 12px; text-align: center; }
     .report-stat .num { font-size: 22px; font-weight: 900; color: var(--accent); }
     .report-stat .lbl { font-size: 11px; color: #999; margin-top: 4px; }
-    
-    /* Category manager */
+
     .category-manager-item { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.05); border: 2px solid var(--border); border-radius: 10px; padding: 10px; margin: 8px 0; cursor: move; transition: all 0.2s; }
     .category-manager-item:hover { border-color: var(--accent); }
     .category-manager-item.dragging { opacity: 0.4; }
@@ -168,31 +170,52 @@
     .category-del-btn:disabled { opacity: 0.3; cursor: not-allowed; }
     .new-category-row { display: flex; gap: 8px; margin-top: 12px; }
     .new-category-row input { margin: 0; }
-    
+
     .modifier-list { border: 2px solid var(--border); border-radius: 10px; padding: 10px 15px; margin: 12px 0; background: rgba(0,0,0,0.2); text-align: right; }
     .modifier-option { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
     .modifier-option:last-child { border-bottom: 0; }
     .modifier-option label { display: flex; align-items: center; gap: 10px; cursor: pointer; flex: 1; }
     .modifier-option input[type="checkbox"] { width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; }
-    
+
     #qrcodeBox { background: #fff; padding: 15px; border-radius: 10px; display: inline-block; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    
+
+    /* Image upload */
+    .img-upload-zone { border: 2px dashed var(--border); border-radius: 10px; padding: 14px; text-align: center; margin-bottom: 12px; background: rgba(255,255,255,0.03); }
+    .img-upload-zone input[type="file"] { margin-bottom: 0; }
+    #menuImagePreviewWrap { display: none; margin-top: 10px; position: relative; display: inline-block; }
+    #menuImagePreviewWrap.show { display: inline-block; }
+    #menuImagePreview { width: 120px; height: 90px; object-fit: cover; border-radius: 8px; border: 2px solid var(--accent); }
+    #removeMenuImageBtn { position: absolute; top: -8px; left: -8px; background: var(--danger); color: #fff; border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 13px; }
+    .upload-status { font-size: 12px; color: var(--accent); margin-top: 6px; }
+
+    /* Printer connection status */
+    .printer-status-box { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.05); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 12px; }
+    .printer-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--danger); display: inline-block; margin-left: 6px; }
+    .printer-dot.connected { background: var(--success); }
+
     #toastContainer { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 10px; align-items: center; }
     .toast { background: #2d2d2d; border-right: 5px solid var(--accent); color: #fff; padding: 14px 24px; border-radius: 10px; font-size: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); opacity: 0; transform: translateY(20px); transition: all 0.3s; }
     .toast.show { opacity: 1; transform: translateY(0); }
     .toast.error { border-right-color: var(--danger); }
     .toast.success { border-right-color: var(--success); }
     .toast.warning { border-right-color: #f39c12; }
-    
+
     .keyboard-hint { font-size: 10px; color: #666; margin-top: 10px; text-align: center; }
-    
+
     @media print {
         body * { visibility: hidden; }
         #receipt-print-area, #receipt-print-area * { visibility: visible; }
         #receipt-print-area { position: absolute; left: 0; top: 0; width: 80mm; font-family: 'Courier New', Courier, monospace; color: #000; background: #fff; padding: 10px; }
+        body.print-kitchen #receipt-print-area { display: none !important; }
+        body.print-kitchen #kitchen-print-area,
+        body.print-kitchen #kitchen-print-area * { visibility: visible; }
+        body.print-kitchen #kitchen-print-area {
+            display: block !important; position: absolute; left: 0; top: 0; width: 80mm;
+            font-family: 'Courier New', Courier, monospace; color: #000; background: #fff; padding: 10px;
+        }
     }
-    #receipt-print-area { display: none; }
-    
+    #receipt-print-area, #kitchen-print-area { display: none; }
+
     @media (max-width: 1200px) {
         .sidebar { width: 240px; }
         .order-panel { width: 380px; }
@@ -201,7 +224,7 @@
 </head>
 <body>
 
-<div id="offlineBanner">️ لا يوجد اتصال بالإنترنت — النظام يعمل محلياً</div>
+<div id="offlineBanner"> لا يوجد اتصال بالإنترنت — النظام يعمل محلياً</div>
 
 <div class="sidebar">
     <div class="logo-area">
@@ -246,31 +269,32 @@
             <input type="tel" id="takeawayPhone" placeholder="رقم الهاتف (لإرسال واتساب)" onchange="updateTakeawayInfo()">
         </div>
     </div>
-    
+
     <div class="search-box">
         <input type="text" id="menuSearch" placeholder="🔍 ابحث في المنيو... (F2)">
     </div>
     <div class="category-tabs" id="categoryTabs"></div>
     <div class="menu-selector" id="menuButtonsContainer"></div>
-    
+
     <div class="order-items" id="orderItemsList"></div>
-    
+
     <div class="total-row">
         <span>المجموع:</span>
         <span id="order-total">0,00 DA</span>
     </div>
-    
+
     <button class="action-btn kitchen-btn" id="kitchenBtn" style="display:none;" onclick="sendToKitchen()">👨‍🍳 إرسال للمطبخ (واتساب)</button>
+    <button class="action-btn kitchen-print-btn" id="kitchenPrintBtn" onclick="printKitchenTicket()" disabled>🖨️👨‍🍳 طباعة تذكرة المطبخ</button>
     <button class="action-btn wa-btn" id="waBtn" style="display:none;" onclick="sendWhatsAppConfirmation()">📱 إرسال تأكيد للزبون</button>
     <button class="action-btn qr-btn" onclick="openQRCodeModal()">📱 QR الطاولة / PDF</button>
-    <button class="action-btn print-btn" id="printBtn" onclick="printOrder()" disabled>🖨️ طباعة الطلب (F4)</button>
+    <button class="action-btn print-btn" id="printBtn" onclick="printOrder()" disabled>🖨️ طباعة إيصال الزبون (F4)</button>
     <button class="action-btn checkout-btn" id="checkoutBtn" onclick="checkoutTable()" disabled>💰 تحصيل وإغلاق (F8)</button>
 </div>
 
 <!-- QR Modal -->
 <div id="qrModal" class="modal-overlay">
     <div class="modal-content">
-        <h3>📱 QR Code للطاولة</h3>
+        <h3 id="qrTitle">📱 QR Code للطاولة</h3>
         <div id="qrcodeBox"></div>
         <p style="font-size: 12px; color: #aaa; margin-bottom: 15px;">امسح الكود لفتح المنيو الرقمي</p>
         <div class="modal-actions">
@@ -310,7 +334,7 @@
 
 <!-- Settings modal -->
 <div id="settingsModal" class="modal-overlay">
-    <div class="modal-content" style="width: 450px;">
+    <div class="modal-content" style="width: 460px;">
         <h3>️ الإعدادات</h3>
         <div class="tab-row">
             <button class="tab-btn active" onclick="switchSettingsTab('menu')">المنيو</button>
@@ -328,6 +352,18 @@
             <select id="newMenuCategory"></select>
             <label style="font-size:12px; color:#ccc; display:block; text-align:right;">السعر (DA)</label>
             <input type="number" id="newMenuPrice" placeholder="400">
+
+            <label style="font-size:12px; color:#ccc; display:block; text-align:right;">صورة المنتج (Cloudinary)</label>
+            <div class="img-upload-zone">
+                <input type="file" id="newMenuImageFile" accept="image/*" onchange="handleMenuImageUpload(event)">
+                <div id="menuImagePreviewWrap">
+                    <img id="menuImagePreview" src="">
+                    <button type="button" id="removeMenuImageBtn" onclick="removeMenuImage()">✕</button>
+                </div>
+                <div class="upload-status" id="uploadStatus"></div>
+            </div>
+            <input type="hidden" id="newMenuImageUrl" value="">
+
             <label style="font-size:12px; color:#ccc; display:block; text-align:right;">الإضافات (سطر لكل واحدة)</label>
             <textarea id="newMenuExtras" placeholder="جبن إضافي: 100&#10;شوكولاتة: 150"></textarea>
             <div class="hint">مثال: "جبن إضافي: 100"</div>
@@ -350,6 +386,18 @@
             <label style="font-size:12px; color:#ccc; display:block; text-align:right;">رقم واتساب الزبائن</label>
             <input type="tel" id="customerPhone" placeholder="213781006798" onchange="updateConfig()">
             <div class="hint">الأرقام بدون + أو 00</div>
+
+            <label style="font-size:12px; color:#ccc; display:block; text-align:right;">Cloudinary Cloud Name</label>
+            <input type="text" id="cloudinaryCloudName" placeholder="my-cloud-name" onchange="updateConfig()">
+            <label style="font-size:12px; color:#ccc; display:block; text-align:right;">Cloudinary Unsigned Upload Preset</label>
+            <input type="text" id="cloudinaryUploadPreset" placeholder="gustavo_menu_unsigned" onchange="updateConfig()">
+            <div class="hint">أنشئ Upload Preset من نوع Unsigned في لوحة Cloudinary → Settings → Upload</div>
+
+            <div class="printer-status-box">
+                <span><span class="printer-dot" id="printerDot"></span><span id="printerStatusText">الطابعة: غير متصلة</span></span>
+                <button class="btn-confirm" style="width:auto; padding:8px 14px;" onclick="connectBluetoothPrinter()">🔌 اتصال</button>
+            </div>
+            <div class="hint">طباعة تذكرة المطبخ عبر طابعة حرارية بلوتوث (ESC/POS) — تجريبي، يتطلب Chrome على أندرويد. أسماء المنتجات بالفرنسية/الإنجليزية تُطبع بشكل أفضل من العربية على أغلب الطابعات الحرارية.</div>
         </div>
         <div class="modal-actions">
             <button class="btn-cancel" onclick="closeModal('settingsModal')">إغلاق</button>
@@ -371,7 +419,7 @@
 
 <div id="toastContainer"></div>
 
-<!-- Print template -->
+<!-- Customer receipt print template -->
 <div id="receipt-print-area">
     <div style="text-align: center; font-weight: bold; font-size: 16px;">Gustavo Sweet & more</div>
     <div style="text-align: center; font-size: 11px; margin-bottom: 10px;">We are the happiness - الشلف</div>
@@ -391,23 +439,32 @@
     <div style="text-align: center; font-size: 10px; margin-top: 10px;">Soyez les bienvenus<br>Merci de votre visite! ❤️</div>
 </div>
 
+<!-- Kitchen ticket print template (no prices, bigger font for chefs) -->
+<div id="kitchen-print-area">
+    <div style="text-align:center; font-weight:bold; font-size:20px;">*** CUISINE ***</div>
+    <div id="kitchen-meta" style="text-align:center; font-weight:bold; font-size:16px; margin:6px 0;">Table 1</div>
+    <div id="kitchen-customer" style="text-align:center; font-size:12px;"></div>
+    <div id="kitchen-date" style="text-align:center; font-size:11px; margin-bottom:6px;">--/--/---- --:--</div>
+    <hr style="border: dashed 1px #000; margin: 5px 0;">
+    <div id="kitchen-items-list" style="font-size:16px; font-weight:bold;"></div>
+    <hr style="border: dashed 1px #000; margin: 5px 0;">
+</div>
+
 <script>
 /* ==================== Gustavo POS - Advanced System ==================== */
-/* Version: 2.0 - Optimized for Gustavo Sweet & more, Chlef */
+/* Version: 2.1 - Images (Cloudinary) + Kitchen printing (thermal BT + paper) */
 
-// Gustavo's Default Menu (Hardcoded for performance)
 const GUSTAVO_DEFAULT_MENU = [
-    // Cookies & Sweet treats
-    { id: 'g1', name: 'Scoop Cookies', price: 150, categoryKey: 'cat_cookies', extras: [], available: true },
-    { id: 'g2', name: 'Crunchy Cake', price: 350, categoryKey: 'cat_cakes', extras: [{name: 'كريمة إضافية', price: 50}, {name: 'فواكه', price: 100}], available: true },
-    { id: 'g3', name: 'Dubai Cake', price: 450, categoryKey: 'cat_cakes', extras: [{name: 'شوكولاتة', price: 100}, {name: 'بندق', price: 80}], available: true },
-    { id: 'g4', name: 'Crêpe Nutella', price: 300, categoryKey: 'cat_crepes', extras: [{name: 'موز', price: 50}, {name: 'آيس كريم', price: 100}], available: true },
-    { id: 'g5', name: 'Crêpe Sugar', price: 200, categoryKey: 'cat_crepes', extras: [], available: true },
-    { id: 'g6', name: 'Milkshake Vanille', price: 250, categoryKey: 'cat_drinks', extras: [{name: 'كريمة', price: 50}], available: true },
-    { id: 'g7', name: 'Milkshake Chocolat', price: 280, categoryKey: 'cat_drinks', extras: [], available: true },
-    { id: 'g8', name: 'Milkshake Fraise', price: 280, categoryKey: 'cat_drinks', extras: [], available: true },
-    { id: 'g9', name: 'Boisson Gaz 1L', price: 150, categoryKey: 'cat_drinks', extras: [], available: true },
-    { id: 'g10', name: 'Café', price: 100, categoryKey: 'cat_drinks', extras: [], available: true },
+    { id: 'g1', name: 'Scoop Cookies', price: 150, categoryKey: 'cat_cookies', extras: [], available: true, imageUrl: '' },
+    { id: 'g2', name: 'Crunchy Cake', price: 350, categoryKey: 'cat_cakes', extras: [{name: 'كريمة إضافية', price: 50}, {name: 'فواكه', price: 100}], available: true, imageUrl: '' },
+    { id: 'g3', name: 'Dubai Cake', price: 450, categoryKey: 'cat_cakes', extras: [{name: 'شوكولاتة', price: 100}, {name: 'بندق', price: 80}], available: true, imageUrl: '' },
+    { id: 'g4', name: 'Crêpe Nutella', price: 300, categoryKey: 'cat_crepes', extras: [{name: 'موز', price: 50}, {name: 'آيس كريم', price: 100}], available: true, imageUrl: '' },
+    { id: 'g5', name: 'Crêpe Sugar', price: 200, categoryKey: 'cat_crepes', extras: [], available: true, imageUrl: '' },
+    { id: 'g6', name: 'Milkshake Vanille', price: 250, categoryKey: 'cat_drinks', extras: [{name: 'كريمة', price: 50}], available: true, imageUrl: '' },
+    { id: 'g7', name: 'Milkshake Chocolat', price: 280, categoryKey: 'cat_drinks', extras: [], available: true, imageUrl: '' },
+    { id: 'g8', name: 'Milkshake Fraise', price: 280, categoryKey: 'cat_drinks', extras: [], available: true, imageUrl: '' },
+    { id: 'g9', name: 'Boisson Gaz 1L', price: 150, categoryKey: 'cat_drinks', extras: [], available: true, imageUrl: '' },
+    { id: 'g10', name: 'Café', price: 100, categoryKey: 'cat_drinks', extras: [], available: true, imageUrl: '' },
 ];
 
 const GUSTAVO_CATEGORIES = [
@@ -468,7 +525,9 @@ function defaultState() {
         config: {
             menuUrlBase: window.location.origin + '/menu.html',
             kitchenPhone: '213781006798',
-            customerPhone: '213781006798'
+            customerPhone: '213781006798',
+            cloudinaryCloudName: '',
+            cloudinaryUploadPreset: ''
         }
     };
 }
@@ -476,22 +535,24 @@ function defaultState() {
 function migrateState(raw) {
     const base = defaultState();
     if (!raw || typeof raw !== 'object') return base;
-    
+
     const s = {
         categories: Array.isArray(raw.categories) && raw.categories.length ? raw.categories : base.categories,
         menu: Array.isArray(raw.menu) ? raw.menu : base.menu,
         zones: raw.zones && typeof raw.zones === 'object' ? raw.zones : base.zones,
         sales: Array.isArray(raw.sales) ? raw.sales : [],
-        config: raw.config || base.config
+        config: Object.assign({}, base.config, raw.config || {})
     };
-    
-    // Ensure all zones exist
+
     if (!s.zones.salle) s.zones.salle = base.zones.salle;
     if (!s.zones.terrasse) s.zones.terrasse = base.zones.terrasse;
     if (!s.zones.takeaway) s.zones.takeaway = base.zones.takeaway;
     s.zones.takeaway.dynamic = true;
     if (!s.zones.takeaway.nextTicket) s.zones.takeaway.nextTicket = 1;
-    
+
+    // ensure imageUrl field exists on every menu item (backward compatibility)
+    s.menu.forEach(m => { if (typeof m.imageUrl === 'undefined') m.imageUrl = ''; });
+
     return s;
 }
 
@@ -518,7 +579,7 @@ function saveState() {
 function loadConfig() {
     try {
         const cfg = localStorage.getItem(CONFIG_KEY);
-        if (cfg) return JSON.parse(cfg);
+        if (cfg) return Object.assign({}, defaultState().config, JSON.parse(cfg));
     } catch (e) {}
     return defaultState().config;
 }
@@ -531,11 +592,13 @@ function saveConfig(cfg) {
 
 let state = loadState();
 let config = loadConfig();
+state.config = config;
 let currentZone = 'salle';
 let activeTable = null;
 let editingMenuItemId = null;
 let pendingOptionsItem = null;
 let activeCategoryTab = null;
+let pendingUploadedImageUrl = '';
 
 /* ==================== Toast Notifications ==================== */
 function showToast(message, type = 'info') {
@@ -545,9 +608,9 @@ function showToast(message, type = 'info') {
     t.innerText = message;
     container.appendChild(t);
     requestAnimationFrame(() => t.classList.add('show'));
-    setTimeout(() => { 
-        t.classList.remove('show'); 
-        setTimeout(() => t.remove(), 300); 
+    setTimeout(() => {
+        t.classList.remove('show');
+        setTimeout(() => t.remove(), 300);
     }, 3000);
 }
 
@@ -555,21 +618,21 @@ function showToast(message, type = 'info') {
 function updateNetworkBanner() {
     document.getElementById('offlineBanner').classList.toggle('show', !navigator.onLine);
 }
-window.addEventListener('online', () => { 
-    updateNetworkBanner(); 
-    showToast('✅ عاد الاتصال بالإنترنت', 'success'); 
+window.addEventListener('online', () => {
+    updateNetworkBanner();
+    showToast('✅ عاد الاتصال بالإنترنت', 'success');
 });
-window.addEventListener('offline', () => { 
-    updateNetworkBanner(); 
-    showToast('⚠️ وضع عدم الاتصال', 'warning'); 
+window.addEventListener('offline', () => {
+    updateNetworkBanner();
+    showToast('⚠️ وضع عدم الاتصال', 'warning');
 });
 
 /* ==================== Modals ==================== */
-function openModal(id) { 
-    document.getElementById(id).classList.add('open'); 
+function openModal(id) {
+    document.getElementById(id).classList.add('open');
 }
-function closeModal(id) { 
-    document.getElementById(id).classList.remove('open'); 
+function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
 }
 
 document.addEventListener('click', (e) => {
@@ -582,7 +645,6 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
         document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
     }
-    // Keyboard shortcuts
     if (e.key === 'F2') {
         e.preventDefault();
         document.getElementById('menuSearch').focus();
@@ -651,14 +713,14 @@ function switchZone(zone) {
 
 function applyTableCount() {
     const val = parseInt(document.getElementById('zoneTableCount').value, 10);
-    if (!val || val < 1 || val > 200) { 
-        showToast('الرجاء إدخال عدد صحيح (1-200)', 'error'); 
-        return; 
+    if (!val || val < 1 || val > 200) {
+        showToast('الرجاء إدخال عدد صحيح (1-200)', 'error');
+        return;
     }
     state.zones[currentZone].count = val;
-    if (activeTable && activeTable > val) { 
-        activeTable = null; 
-        document.getElementById('selected-table-title').innerText = 'اختر طاولة للبدء'; 
+    if (activeTable && activeTable > val) {
+        activeTable = null;
+        document.getElementById('selected-table-title').innerText = 'اختر طاولة للبدء';
     }
     saveState();
     renderTables();
@@ -755,11 +817,11 @@ function updateTakeawayInfo() {
 function renderCategoryTabs() {
     const host = document.getElementById('categoryTabs');
     const cats = getCategories();
-    if (!activeCategoryTab || !cats.find(c => c.key === activeCategoryTab)) 
+    if (!activeCategoryTab || !cats.find(c => c.key === activeCategoryTab))
         activeCategoryTab = cats[0]?.key;
-    
+
     host.innerHTML = cats.map(cat => `
-        <button type="button" class="category-tab ${cat.key === activeCategoryTab ? 'active' : ''}" 
+        <button type="button" class="category-tab ${cat.key === activeCategoryTab ? 'active' : ''}"
                 onclick="setCategoryTab('${cat.key}')">
             ${escapeHtml(cat.emoji || '🍽️')} ${escapeHtml(cat.label)}
         </button>
@@ -790,8 +852,12 @@ function renderMenuButtons() {
         items.forEach(item => {
             const btn = document.createElement('button');
             btn.className = 'menu-item-btn';
+            const thumb = item.imageUrl
+                ? `<img class="item-thumb" src="${escapeHtml(item.imageUrl)}" loading="lazy" alt="">`
+                : `<div class="item-thumb-placeholder">🍽️</div>`;
             btn.innerHTML = (item.extras.length ? '<span class="extras-flag">✨</span>' : '') +
-                escapeHtml(item.name) + '<br><small>' + item.price + ' DA</small>';
+                thumb +
+                `<span class="item-label">${escapeHtml(item.name)}<br><small>${item.price} DA</small></span>`;
             btn.onclick = () => {
                 if (item.extras.length > 0) openItemOptions(item);
                 else addOrderLine(item, [], 1);
@@ -810,9 +876,9 @@ function renderMenuButtons() {
 function confirmCustomItem() {
     const name = document.getElementById('customItemName').value.trim();
     const price = parseFloat(document.getElementById('customItemPrice').value);
-    if (!name || isNaN(price) || price < 0) { 
-        showToast('الرجاء إدخال اسم وسعر صحيحين', 'error'); 
-        return; 
+    if (!name || isNaN(price) || price < 0) {
+        showToast('الرجاء إدخال اسم وسعر صحيحين', 'error');
+        return;
     }
     addOrderLine({ name, price }, [], 1);
     document.getElementById('customItemName').value = '';
@@ -857,9 +923,9 @@ function extrasText(extras) {
 }
 
 function addOrderLine(baseItem, extras, qty) {
-    if (!activeTable) { 
-        showToast('الرجاء اختيار طاولة أولاً!', 'error'); 
-        return; 
+    if (!activeTable) {
+        showToast('الرجاء اختيار طاولة أولاً!', 'error');
+        return;
     }
     const t = getTable(currentZone, activeTable);
     if (t.order.length === 0) t.openedAt = Date.now();
@@ -910,12 +976,14 @@ function updateOrderUI() {
     const list = document.getElementById('orderItemsList');
     const printBtn = document.getElementById('printBtn');
     const checkoutBtn = document.getElementById('checkoutBtn');
+    const kitchenPrintBtn = document.getElementById('kitchenPrintBtn');
 
     if (!activeTable) {
         list.innerHTML = '<p class="empty-cart">اختر طاولة لعرض الطلبات</p>';
         document.getElementById('order-total').innerText = formatMoney(0);
         printBtn.disabled = true;
         checkoutBtn.disabled = true;
+        kitchenPrintBtn.disabled = true;
         return;
     }
 
@@ -924,10 +992,12 @@ function updateOrderUI() {
         list.innerHTML = '<p class="empty-cart">السلة فارغة</p>';
         printBtn.disabled = true;
         checkoutBtn.disabled = true;
+        kitchenPrintBtn.disabled = true;
     } else {
         list.innerHTML = '';
         printBtn.disabled = false;
         checkoutBtn.disabled = false;
+        kitchenPrintBtn.disabled = false;
         t.order.forEach((item, idx) => {
             const extraTxt = extrasText(item.extras);
             const row = document.createElement('div');
@@ -958,21 +1028,21 @@ function buildMenuUrl() {
 }
 
 function openQRCodeModal() {
-    if (!activeTable) { 
-        showToast('الرجاء اختيار الطاولة أولاً', 'error'); 
-        return; 
+    if (!activeTable) {
+        showToast('الرجاء اختيار الطاولة أولاً', 'error');
+        return;
     }
     const menuUrl = buildMenuUrl();
-    document.getElementById('qrTitle').innerText = `QR - ${currentZone.toUpperCase()} : ${activeTable}`;
+    document.getElementById('qrTitle').innerText = `📱 QR - ${currentZone.toUpperCase()} : ${activeTable}`;
     const box = document.getElementById('qrcodeBox');
     box.innerHTML = '';
     try {
-        new QRCode(box, { 
-            text: menuUrl, 
-            width: 200, 
-            height: 200, 
-            colorDark: '#4A235A', 
-            colorLight: '#ffffff' 
+        new QRCode(box, {
+            text: menuUrl,
+            width: 200,
+            height: 200,
+            colorDark: '#4A235A',
+            colorLight: '#ffffff'
         });
     } catch (e) {
         box.innerHTML = `<p style="color:#000; font-size:11px; width:200px;">${escapeHtml(menuUrl)}</p>`;
@@ -981,13 +1051,13 @@ function openQRCodeModal() {
 }
 
 function downloadTableQRPoster() {
-    if (!activeTable) { 
-        showToast('اختر طاولة أولاً', 'error'); 
-        return; 
+    if (!activeTable) {
+        showToast('اختر طاولة أولاً', 'error');
+        return;
     }
-    if (!window.jspdf) { 
-        showToast('جاري تحميل المكتبة...', 'warning'); 
-        return; 
+    if (!window.jspdf) {
+        showToast('جاري تحميل المكتبة...', 'warning');
+        return;
     }
 
     const { jsPDF } = window.jspdf;
@@ -996,13 +1066,13 @@ function downloadTableQRPoster() {
     const tempBox = document.createElement('div');
 
     try {
-        new QRCode(tempBox, { 
-            text: menuUrl, 
-            width: 300, 
-            height: 300, 
-            colorDark: '#000000', 
-            colorLight: '#ffffff', 
-            correctLevel: QRCode.CorrectLevel.H 
+        new QRCode(tempBox, {
+            text: menuUrl,
+            width: 300,
+            height: 300,
+            colorDark: '#000000',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
         });
     } catch (e) {
         showToast('تعذر توليد QR', 'error');
@@ -1014,8 +1084,8 @@ function downloadTableQRPoster() {
         docPdf.setFontSize(22);
         docPdf.text('Gustavo Sweet & more', 105, 20, { align: 'center' });
         docPdf.setFontSize(14);
-        const label = currentZone === 'takeaway' ? 
-            `Ticket #${activeTable}` : 
+        const label = currentZone === 'takeaway' ?
+            `Ticket #${activeTable}` :
             `Table ${activeTable} - ${currentZone.toUpperCase()}`;
         docPdf.text(label, 105, 32, { align: 'center' });
 
@@ -1036,9 +1106,9 @@ function downloadTableQRPoster() {
 function sendToKitchen() {
     if (!activeTable || currentZone !== 'takeaway') return;
     const t = getTable('takeaway', activeTable);
-    if (t.order.length === 0) { 
-        showToast('السلة فارغة!', 'error'); 
-        return; 
+    if (t.order.length === 0) {
+        showToast('السلة فارغة!', 'error');
+        return;
     }
 
     const phone = config.kitchenPhone || '213781006798';
@@ -1046,14 +1116,14 @@ function sendToKitchen() {
     msg += `🧾 Ticket #${activeTable}\n`;
     if (t.customerName) msg += `👤 ${t.customerName}\n`;
     msg += `\n📋 *الطلب:*\n`;
-    
+
     t.order.forEach((item, idx) => {
         const extraTxt = extrasText(item.extras);
         msg += `${idx + 1}. ${item.name} x${item.qty}`;
         if (extraTxt) msg += ` (${extraTxt})`;
         msg += `\n`;
     });
-    
+
     msg += `\n💰 *المجموع: ${tableTotal(t).toFixed(2)} DA*`;
 
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
@@ -1063,29 +1133,29 @@ function sendToKitchen() {
 function sendWhatsAppConfirmation() {
     if (!activeTable || currentZone !== 'takeaway') return;
     const t = getTable('takeaway', activeTable);
-    if (t.order.length === 0) { 
-        showToast('السلة فارغة!', 'error'); 
-        return; 
+    if (t.order.length === 0) {
+        showToast('السلة فارغة!', 'error');
+        return;
     }
 
     const cleaned = cleanAlgerianPhone(t.customerPhone);
-    if (!cleaned) { 
-        showToast('أدخل رقم هاتف صحيح (05/06/07 + 8 أرقام)', 'error'); 
-        return; 
+    if (!cleaned) {
+        showToast('أدخل رقم هاتف صحيح (05/06/07 + 8 أرقام)', 'error');
+        return;
     }
 
     const phone = config.customerPhone || '213781006798';
     let msg = `🧁 *Gustavo Sweet & more*\n\n`;
     msg += `مرحباً ${t.customerName || 'عزيزي الزبون'}،\n`;
     msg += `تفاصيل طلبك:\n\n`;
-    
+
     t.order.forEach((item, idx) => {
         const extraTxt = extrasText(item.extras);
         msg += `${idx + 1}. ${item.name}`;
         if (extraTxt) msg += ` (${extraTxt})`;
         msg += ` x${item.qty} — ${(item.unitPrice * item.qty).toFixed(2)} DA\n`;
     });
-    
+
     msg += `\n💰 *المجموع: ${tableTotal(t).toFixed(2)} DA*\n`;
     msg += `\nشكراً لثقتكم! ❤️`;
 
@@ -1093,15 +1163,15 @@ function sendWhatsAppConfirmation() {
     showToast(' تم إرسال التأكيد', 'success');
 }
 
-/* ==================== Printing ==================== */
+/* ==================== Printing (customer receipt) ==================== */
 function fillReceipt(zone, table, order, total, customerName) {
-    const label = zone === 'takeaway' ? 
-        `Type: TAKEAWAY | Ticket: #${table}` : 
+    const label = zone === 'takeaway' ?
+        `Type: TAKEAWAY | Ticket: #${table}` :
         `Plan: ${zone.toUpperCase()} | Table: ${table}`;
     document.getElementById('receipt-meta').innerText = label;
     document.getElementById('receipt-customer').innerText = customerName ? ('Client: ' + customerName) : '';
     document.getElementById('receipt-date').innerText = `Date: ${getCurrentDateTime()}`;
-    
+
     const receiptList = document.getElementById('receipt-items-list');
     receiptList.innerHTML = '';
     order.forEach(item => {
@@ -1122,26 +1192,66 @@ function fillReceipt(zone, table, order, total, customerName) {
 function printOrder() {
     if (!activeTable) return;
     const t = getTable(currentZone, activeTable);
-    if (t.order.length === 0) { 
-        showToast('السلة فارغة!', 'error'); 
-        return; 
+    if (t.order.length === 0) {
+        showToast('السلة فارغة!', 'error');
+        return;
     }
+    document.body.classList.remove('print-kitchen');
     fillReceipt(currentZone, activeTable, t.order, tableTotal(t), t.customerName);
     window.print();
-    showToast('🖨️ جاري الطباعة...', 'success');
+    showToast('🖨️ جاري طباعة إيصال الزبون...', 'success');
+}
+
+/* ==================== Kitchen ticket (no prices, for chefs) ==================== */
+function fillKitchenTicket(zone, table, order, customerName) {
+    const label = zone === 'takeaway' ? `TAKEAWAY — Ticket #${table}` : `${zone.toUpperCase()} — Table ${table}`;
+    document.getElementById('kitchen-meta').innerText = label;
+    document.getElementById('kitchen-customer').innerText = customerName ? ('Client: ' + customerName) : '';
+    document.getElementById('kitchen-date').innerText = getCurrentDateTime();
+
+    const list = document.getElementById('kitchen-items-list');
+    list.innerHTML = '';
+    order.forEach(item => {
+        const extraTxt = extrasText(item.extras);
+        list.innerHTML += `
+            <div style="margin-bottom:8px;">
+                <div>${item.qty} x ${escapeHtml(item.name)}</div>
+                ${extraTxt ? `<div style="font-size:12px; font-weight:normal;">+ ${escapeHtml(extraTxt)}</div>` : ''}
+            </div>
+        `;
+    });
+}
+
+function printKitchenTicket() {
+    if (!activeTable) return;
+    const t = getTable(currentZone, activeTable);
+    if (t.order.length === 0) {
+        showToast('السلة فارغة!', 'error');
+        return;
+    }
+    fillKitchenTicket(currentZone, activeTable, t.order, t.customerName);
+    document.body.classList.add('print-kitchen');
+    window.print();
+    setTimeout(() => document.body.classList.remove('print-kitchen'), 500);
+
+    // Also try the Bluetooth thermal printer if one is connected
+    sendKitchenTicketToBluetoothPrinter(currentZone, activeTable, t.order, t.customerName);
+
+    showToast('🖨️👨‍🍳 جاري إرسال تذكرة المطبخ...', 'success');
 }
 
 function checkoutTable() {
     if (!activeTable) return;
     const t = getTable(currentZone, activeTable);
-    if (t.order.length === 0) { 
-        showToast('السلة فارغة!', 'error'); 
-        return; 
+    if (t.order.length === 0) {
+        showToast('السلة فارغة!', 'error');
+        return;
     }
     const total = tableTotal(t);
-    
+
     if (!confirm(`تحصيل ${formatMoney(total)}؟`)) return;
-    
+
+    document.body.classList.remove('print-kitchen');
     fillReceipt(currentZone, activeTable, t.order, total, t.customerName);
     window.print();
 
@@ -1173,17 +1283,167 @@ function checkoutTable() {
     showToast('✅ تم التحصيل وإغلاق الطاولة', 'success');
 }
 
+/* ==================== Bluetooth thermal printer (ESC/POS) ==================== */
+let btPrinterDevice = null;
+let btPrinterCharacteristic = null;
+// Common thermal printer BLE service/characteristic UUIDs (works with many generic 58/80mm ESC/POS printers)
+const BT_PRINTER_SERVICE_UUID = '000018f0-0000-1000-8000-00805f9b34fb';
+const BT_PRINTER_CHAR_UUID = '00002af1-0000-1000-8000-00805f9b34fb';
+
+function updatePrinterStatusUI() {
+    const dot = document.getElementById('printerDot');
+    const text = document.getElementById('printerStatusText');
+    if (!dot || !text) return;
+    if (btPrinterCharacteristic) {
+        dot.classList.add('connected');
+        text.innerText = 'الطابعة: متصلة (' + (btPrinterDevice ? btPrinterDevice.name || 'Printer' : '') + ')';
+    } else {
+        dot.classList.remove('connected');
+        text.innerText = 'الطابعة: غير متصلة';
+    }
+}
+
+async function connectBluetoothPrinter() {
+    if (!navigator.bluetooth) {
+        showToast('⚠️ المتصفح لا يدعم Web Bluetooth (استخدم Chrome على أندرويد)', 'error');
+        return;
+    }
+    try {
+        const device = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: [BT_PRINTER_SERVICE_UUID]
+        });
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService(BT_PRINTER_SERVICE_UUID);
+        const characteristic = await service.getCharacteristic(BT_PRINTER_CHAR_UUID);
+        btPrinterDevice = device;
+        btPrinterCharacteristic = characteristic;
+        device.addEventListener('gattserverdisconnected', () => {
+            btPrinterCharacteristic = null;
+            btPrinterDevice = null;
+            updatePrinterStatusUI();
+            showToast('🔌 انقطع الاتصال بالطابعة', 'warning');
+        });
+        updatePrinterStatusUI();
+        showToast('✅ تم الاتصال بالطابعة: ' + (device.name || ''), 'success');
+    } catch (e) {
+        console.error(e);
+        showToast('❌ تعذر الاتصال بالطابعة (تأكد أنها طابعة ESC/POS متوافقة مع BLE)', 'error');
+    }
+}
+
+// Minimal ESC/POS byte builder. Arabic text is not supported by most thermal
+// printer firmwares over this simple codepage, so kitchen tickets print best
+// with Latin-script item names (French/English), which is how this menu is set up.
+function escposBuildKitchenTicket(zone, table, order, customerName) {
+    const enc = new TextEncoder();
+    let bytes = [];
+    const push = (...b) => { bytes.push(...b); };
+    const text = (str, opts = {}) => {
+        push(0x1B, 0x45, opts.bold ? 0x01 : 0x00);           // bold on/off
+        push(0x1D, 0x21, opts.big ? 0x11 : 0x00);            // double width+height
+        push(0x1B, 0x61, opts.center ? 0x01 : 0x00);         // align center/left
+        push(...Array.from(enc.encode(str + '\n')));
+    };
+
+    push(0x1B, 0x40); // init
+    text('*** CUISINE ***', { bold: true, big: true, center: true });
+    const label = zone === 'takeaway' ? ('Ticket #' + table) : (zone.toUpperCase() + ' - Table ' + table);
+    text(label, { bold: true, center: true });
+    if (customerName) text('Client: ' + customerName, { center: true });
+    text(getCurrentDateTime(), { center: true });
+    text('--------------------------------', {});
+    order.forEach(it => {
+        text(it.qty + 'x ' + it.name, { bold: true, big: true });
+        if (it.extras && it.extras.length) {
+            text('  + ' + it.extras.map(e => e.name).join(', '), {});
+        }
+    });
+    text('--------------------------------', {});
+    push(0x1B, 0x64, 0x04); // feed 4 lines
+    return new Uint8Array(bytes);
+}
+
+async function sendKitchenTicketToBluetoothPrinter(zone, table, order, customerName) {
+    if (!btPrinterCharacteristic) return; // no thermal printer connected — silently skip
+    try {
+        const data = escposBuildKitchenTicket(zone, table, order, customerName);
+        const chunkSize = 100; // BLE writes need to be chunked, most stacks cap around 20-180 bytes
+        for (let i = 0; i < data.length; i += chunkSize) {
+            await btPrinterCharacteristic.writeValue(data.slice(i, i + chunkSize));
+        }
+        showToast('🖨️ تم الإرسال للطابعة الحرارية', 'success');
+    } catch (e) {
+        console.error(e);
+        showToast('❌ فشل الإرسال للطابعة الحرارية', 'error');
+    }
+}
+
+/* ==================== Cloudinary image upload ==================== */
+function handleMenuImageUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!config.cloudinaryCloudName || !config.cloudinaryUploadPreset) {
+        showToast('⚠️ أدخل Cloudinary Cloud Name و Upload Preset أولاً من تبويب الإعدادات', 'error');
+        event.target.value = '';
+        return;
+    }
+
+    const statusEl = document.getElementById('uploadStatus');
+    statusEl.innerText = '⏳ جاري رفع الصورة...';
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', config.cloudinaryUploadPreset);
+
+    fetch(`https://api.cloudinary.com/v1_1/${config.cloudinaryCloudName}/image/upload`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.secure_url) {
+            pendingUploadedImageUrl = data.secure_url;
+            document.getElementById('newMenuImageUrl').value = data.secure_url;
+            document.getElementById('menuImagePreview').src = data.secure_url;
+            document.getElementById('menuImagePreviewWrap').classList.add('show');
+            statusEl.innerText = '✅ تم رفع الصورة بنجاح';
+            showToast('✅ تم رفع الصورة', 'success');
+        } else {
+            statusEl.innerText = '❌ فشل الرفع: تحقق من Cloud Name / Upload Preset';
+            showToast('❌ فشل رفع الصورة', 'error');
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        statusEl.innerText = '❌ خطأ في الاتصال بـ Cloudinary';
+        showToast('❌ خطأ في رفع الصورة', 'error');
+    });
+}
+
+function removeMenuImage() {
+    pendingUploadedImageUrl = '';
+    document.getElementById('newMenuImageUrl').value = '';
+    document.getElementById('menuImagePreview').src = '';
+    document.getElementById('menuImagePreviewWrap').classList.remove('show');
+    document.getElementById('newMenuImageFile').value = '';
+    document.getElementById('uploadStatus').innerText = '';
+}
+
 /* ==================== Settings ==================== */
 function openSettings() {
     populateCategorySelect();
     renderMenuManageList();
     renderCategoryManager();
-    
-    // Load config
+
     document.getElementById('menuUrlBase').value = config.menuUrlBase || '';
     document.getElementById('kitchenPhone').value = config.kitchenPhone || '';
     document.getElementById('customerPhone').value = config.customerPhone || '';
-    
+    document.getElementById('cloudinaryCloudName').value = config.cloudinaryCloudName || '';
+    document.getElementById('cloudinaryUploadPreset').value = config.cloudinaryUploadPreset || '';
+    updatePrinterStatusUI();
+
     switchSettingsTab('menu');
     openModal('settingsModal');
 }
@@ -1204,6 +1464,8 @@ function updateConfig() {
     config.menuUrlBase = document.getElementById('menuUrlBase').value.trim();
     config.kitchenPhone = document.getElementById('kitchenPhone').value.trim();
     config.customerPhone = document.getElementById('customerPhone').value.trim();
+    config.cloudinaryCloudName = document.getElementById('cloudinaryCloudName').value.trim();
+    config.cloudinaryUploadPreset = document.getElementById('cloudinaryUploadPreset').value.trim();
     saveConfig(config);
     state.config = config;
     saveState();
@@ -1212,7 +1474,7 @@ function updateConfig() {
 
 function populateCategorySelect() {
     const select = document.getElementById('newMenuCategory');
-    select.innerHTML = getCategories().map(c => 
+    select.innerHTML = getCategories().map(c =>
         `<option value="${escapeHtml(c.key)}">${escapeHtml(c.emoji || '🍽️')} ${escapeHtml(c.label)}</option>`
     ).join('');
 }
@@ -1220,30 +1482,30 @@ function populateCategorySelect() {
 function renderCategoryManager() {
     const list = document.getElementById('categoriesList');
     const cats = getCategories();
-    if (cats.length === 0) { 
-        list.innerHTML = '<p style="color:#777; font-size:12px;">لا توجد تصنيفات</p>'; 
-        return; 
+    if (cats.length === 0) {
+        list.innerHTML = '<p style="color:#777; font-size:12px;">لا توجد تصنيفات</p>';
+        return;
     }
     list.innerHTML = cats.map((cat, idx) => `
         <div class="category-manager-item" draggable="true" data-idx="${idx}"
-             ondragstart="dragCatStart(event, ${idx})" 
+             ondragstart="dragCatStart(event, ${idx})"
              ondragover="event.preventDefault()"
-             ondragenter="dragCatEnter(event)" 
+             ondragenter="dragCatEnter(event)"
              ondragleave="dragCatLeave(event)"
-             ondrop="dropCat(event, ${idx})" 
+             ondrop="dropCat(event, ${idx})"
              ondragend="dragCatEnd(event)">
             <span class="drag-handle">⋮⋮</span>
-            <input type="text" class="category-emoji-input" 
-                   value="${escapeHtml(cat.emoji || '🍽️')}" 
-                   maxlength="4" 
+            <input type="text" class="category-emoji-input"
+                   value="${escapeHtml(cat.emoji || '🍽️')}"
+                   maxlength="4"
                    onchange="updateCatEmoji(${idx}, this.value)">
-            <input type="text" class="category-name-input" 
-                   value="${escapeHtml(cat.label)}" 
-                   maxlength="30" 
+            <input type="text" class="category-name-input"
+                   value="${escapeHtml(cat.label)}"
+                   maxlength="30"
                    onchange="updateCatName(${idx}, this.value)">
-            <button class="category-del-btn" 
-                    onclick="deleteCategory(${idx})" 
-                    ${cats.length <= 1 ? 'disabled' : ''} 
+            <button class="category-del-btn"
+                    onclick="deleteCategory(${idx})"
+                    ${cats.length <= 1 ? 'disabled' : ''}
                     title="حذف">🗑️</button>
         </div>
     `).join('');
@@ -1251,10 +1513,10 @@ function renderCategoryManager() {
 
 function updateCatName(idx, val) {
     const trimmed = val.trim();
-    if (!trimmed) { 
-        showToast('لا يمكن ترك اسم القسم فارغاً', 'error'); 
-        renderCategoryManager(); 
-        return; 
+    if (!trimmed) {
+        showToast('لا يمكن ترك اسم القسم فارغاً', 'error');
+        renderCategoryManager();
+        return;
     }
     state.categories[idx].label = trimmed;
     saveState();
@@ -1276,21 +1538,21 @@ function addNewCategory() {
     const nameInput = document.getElementById('newCategoryName');
     const emoji = emojiInput.value.trim() || '️';
     const name = nameInput.value.trim();
-    
-    if (!name) { 
-        showToast('أدخل اسم القسم', 'error'); 
-        return; 
+
+    if (!name) {
+        showToast('أدخل اسم القسم', 'error');
+        return;
     }
-    if (state.categories.find(c => c.label.toLowerCase() === name.toLowerCase())) { 
-        showToast('القسم موجود بالفعل', 'error'); 
-        return; 
+    if (state.categories.find(c => c.label.toLowerCase() === name.toLowerCase())) {
+        showToast('القسم موجود بالفعل', 'error');
+        return;
     }
 
-    state.categories.push({ 
-        key: genId('cat'), 
-        emoji, 
-        label: name, 
-        order: state.categories.length 
+    state.categories.push({
+        key: genId('cat'),
+        emoji,
+        label: name,
+        order: state.categories.length
     });
     saveState();
     emojiInput.value = '';
@@ -1303,21 +1565,21 @@ function addNewCategory() {
 }
 
 function deleteCategory(idx) {
-    if (state.categories.length <= 1) { 
-        showToast('يجب وجود قسم واحد على الأقل', 'error'); 
-        return; 
+    if (state.categories.length <= 1) {
+        showToast('يجب وجود قسم واحد على الأقل', 'error');
+        return;
     }
     const cat = state.categories[idx];
     const itemsInCat = state.menu.filter(m => m.categoryKey === cat.key).length;
     const msg = itemsInCat > 0 ?
         `هذا القسم يحتوي على ${itemsInCat} منتج. هل تريد المتابعة؟` :
         `حذف قسم "${cat.label}"؟`;
-    
+
     if (!confirm(msg)) return;
 
     const fallbackKey = state.categories[idx === 0 ? 1 : 0].key;
-    state.menu.forEach(m => { 
-        if (m.categoryKey === cat.key) m.categoryKey = fallbackKey; 
+    state.menu.forEach(m => {
+        if (m.categoryKey === cat.key) m.categoryKey = fallbackKey;
     });
     state.categories.splice(idx, 1);
     state.categories.forEach((c, i) => c.order = i);
@@ -1332,25 +1594,25 @@ function deleteCategory(idx) {
 }
 
 let dragCatSrc = null;
-function dragCatStart(e, idx) { 
-    dragCatSrc = idx; 
-    e.dataTransfer.effectAllowed = 'move'; 
-    e.target.classList.add('dragging'); 
+function dragCatStart(e, idx) {
+    dragCatSrc = idx;
+    e.dataTransfer.effectAllowed = 'move';
+    e.target.classList.add('dragging');
 }
-function dragCatEnter(e) { 
-    const item = e.target.closest('.category-manager-item'); 
-    if (item) item.classList.add('drag-over'); 
+function dragCatEnter(e) {
+    const item = e.target.closest('.category-manager-item');
+    if (item) item.classList.add('drag-over');
 }
-function dragCatLeave(e) { 
-    const item = e.target.closest('.category-manager-item'); 
-    if (item) item.classList.remove('drag-over'); 
+function dragCatLeave(e) {
+    const item = e.target.closest('.category-manager-item');
+    if (item) item.classList.remove('drag-over');
 }
 function dropCat(e, targetIdx) {
     e.preventDefault();
     const item = e.target.closest('.category-manager-item');
     if (item) item.classList.remove('drag-over');
     if (dragCatSrc === null || dragCatSrc === targetIdx) return;
-    
+
     const [moved] = state.categories.splice(dragCatSrc, 1);
     state.categories.splice(targetIdx, 0, moved);
     state.categories.forEach((c, i) => c.order = i);
@@ -1378,20 +1640,24 @@ function parseExtrasTextarea(val) {
 
 function renderMenuManageList() {
     const container = document.getElementById('menuManageList');
-    if (state.menu.length === 0) { 
-        container.innerHTML = '<p style="color:#777; font-size:12px;">لا توجد منتجات</p>'; 
-        return; 
+    if (state.menu.length === 0) {
+        container.innerHTML = '<p style="color:#777; font-size:12px;">لا توجد منتجات</p>';
+        return;
     }
     container.innerHTML = state.menu.map(item => {
         const cat = getCategory(item.categoryKey);
+        const thumb = item.imageUrl
+            ? `<img class="thumb" src="${escapeHtml(item.imageUrl)}" alt="">`
+            : `<div class="thumb" style="display:flex;align-items:center;justify-content:center;">🍽️</div>`;
         return `
         <div class="row">
+            ${thumb}
             <div class="info">
-                <div>${escapeHtml(cat?.emoji || '🍽️')} ${escapeHtml(item.name)} — ${item.price} DA 
+                <div>${escapeHtml(cat?.emoji || '🍽️')} ${escapeHtml(item.name)} — ${item.price} DA
                 ${item.extras.length ? '✨' : ''}</div>
                 ${!item.available ? '<div class="unavail">غير متاح</div>' : ''}
             </div>
-            <button title="${item.available ? 'إخفاء' : 'إظهار'}" 
+            <button title="${item.available ? 'إخفاء' : 'إظهار'}"
                     onclick="toggleMenuItemAvailability('${item.id}')">
                 ${item.available ? '⏸️' : '▶️'}
             </button>
@@ -1420,6 +1686,15 @@ function startEditMenuItem(id) {
     document.getElementById('newMenuPrice').value = item.price;
     document.getElementById('newMenuExtras').value = item.extras
         .map(e => e.name + (e.price ? ': ' + e.price : '')).join('\n');
+
+    if (item.imageUrl) {
+        document.getElementById('newMenuImageUrl').value = item.imageUrl;
+        document.getElementById('menuImagePreview').src = item.imageUrl;
+        document.getElementById('menuImagePreviewWrap').classList.add('show');
+    } else {
+        removeMenuImage();
+    }
+
     document.getElementById('saveMenuItemBtn').innerText = '💾 حفظ التعديلات';
     document.getElementById('cancelEditMenuBtn').style.display = 'block';
     switchSettingsTab('add');
@@ -1430,6 +1705,7 @@ function cancelMenuItemEdit() {
     document.getElementById('newMenuName').value = '';
     document.getElementById('newMenuPrice').value = '';
     document.getElementById('newMenuExtras').value = '';
+    removeMenuImage();
     document.getElementById('saveMenuItemBtn').innerText = '💾 حفظ المنتج';
     document.getElementById('cancelEditMenuBtn').style.display = 'none';
 }
@@ -1439,35 +1715,39 @@ function saveMenuItemForm() {
     const categoryKey = document.getElementById('newMenuCategory').value;
     const price = parseFloat(document.getElementById('newMenuPrice').value);
     const extras = parseExtrasTextarea(document.getElementById('newMenuExtras').value);
+    const imageUrl = document.getElementById('newMenuImageUrl').value.trim();
 
-    if (!name || isNaN(price) || price < 0) { 
-        showToast('أدخل اسم وسعر صحيحين', 'error'); 
-        return; 
+    if (!name || isNaN(price) || price < 0) {
+        showToast('أدخل اسم وسعر صحيحين', 'error');
+        return;
     }
 
     if (editingMenuItemId) {
         const item = state.menu.find(m => m.id === editingMenuItemId);
-        if (item) { 
-            item.name = name; 
-            item.categoryKey = categoryKey; 
-            item.price = price; 
-            item.extras = extras; 
+        if (item) {
+            item.name = name;
+            item.categoryKey = categoryKey;
+            item.price = price;
+            item.extras = extras;
+            item.imageUrl = imageUrl;
         }
         showToast('✅ تم التحديث', 'success');
         cancelMenuItemEdit();
     } else {
-        state.menu.push({ 
-            id: genId('m'), 
-            name, 
-            categoryKey, 
-            price, 
-            extras, 
-            available: true 
+        state.menu.push({
+            id: genId('m'),
+            name,
+            categoryKey,
+            price,
+            extras,
+            available: true,
+            imageUrl
         });
         showToast('✅ تمت الإضافة', 'success');
         document.getElementById('newMenuName').value = '';
         document.getElementById('newMenuPrice').value = '';
         document.getElementById('newMenuExtras').value = '';
+        removeMenuImage();
     }
 
     saveState();
@@ -1489,42 +1769,42 @@ function deleteMenuItem(id) {
 function isToday(isoDate) {
     const d = new Date(isoDate);
     const now = new Date();
-    return d.getFullYear() === now.getFullYear() && 
-           d.getMonth() === now.getMonth() && 
+    return d.getFullYear() === now.getFullYear() &&
+           d.getMonth() === now.getMonth() &&
            d.getDate() === now.getDate();
 }
 
 function openReport() {
     const todaySales = state.sales.filter(s => isToday(s.date));
     const body = document.getElementById('reportBody');
-    
+
     if (todaySales.length === 0) {
         body.innerHTML = '<p style="color:#777; font-size:13px; text-align:center; margin:20px 0;">لا توجد مبيعات اليوم</p>';
         openModal('reportModal');
         return;
     }
-    
+
     const itemTotals = {};
     let grandTotal = 0;
     let totalOrders = 0;
-    
+
     todaySales.forEach(sale => {
         grandTotal += sale.total;
         totalOrders++;
         sale.items.forEach(it => {
-            if (!itemTotals[it.name]) 
+            if (!itemTotals[it.name])
                 itemTotals[it.name] = { qty: 0, revenue: 0 };
             itemTotals[it.name].qty += it.qty;
             itemTotals[it.name].revenue += it.unitPrice * it.qty;
         });
     });
-    
+
     let topName = '', topQty = 0;
-    Object.keys(itemTotals).forEach(k => { 
-        if (itemTotals[k].qty > topQty) { 
-            topQty = itemTotals[k].qty; 
-            topName = k; 
-        } 
+    Object.keys(itemTotals).forEach(k => {
+        if (itemTotals[k].qty > topQty) {
+            topQty = itemTotals[k].qty;
+            topName = k;
+        }
     });
 
     let html = `
@@ -1539,7 +1819,7 @@ function openReport() {
             </div>
         </div>
     `;
-    
+
     Object.keys(itemTotals).sort().forEach(name => {
         html += `
             <div class="report-line">
@@ -1548,7 +1828,7 @@ function openReport() {
             </div>
         `;
     });
-    
+
     html += `<div class="report-total">الإجمالي: ${grandTotal.toFixed(2)} DA</div>`;
     body.innerHTML = html;
     openModal('reportModal');
@@ -1578,13 +1858,15 @@ function exportData() {
 function importData(event) {
     const file = event.target.files[0];
     if (!file) return;
-    
+
     const reader = new FileReader();
     reader.onload = function(e) {
         try {
             const imported = JSON.parse(e.target.result);
             if (confirm('⚠️ سيتم استبدال البيانات الحالية. هل تريد المتابعة؟')) {
                 state = migrateState(imported);
+                config = Object.assign({}, config, state.config || {});
+                saveConfig(config);
                 saveState();
                 location.reload();
             }
@@ -1612,20 +1894,20 @@ function init() {
     document.getElementById('zoneConfigRow').style.display = z.dynamic ? 'none' : 'flex';
     document.getElementById('newTicketSidebarBtn').style.display = z.dynamic ? 'block' : 'none';
     if (!z.dynamic) document.getElementById('zoneTableCount').value = z.count;
-    
+
     renderCategoryTabs();
     renderMenuButtons();
     renderTables();
     updateOrderUI();
-    
+    updatePrinterStatusUI();
+
     document.getElementById('menuSearch').addEventListener('input', debounce(renderMenuButtons, 200));
-    setInterval(renderTables, 30000); // Update timers every 30s
-    
+    setInterval(renderTables, 30000);
+
     showToast(' Gustavo POS جاهز!', 'success');
 }
 
-// Start the system
 init();
 </script>
 </body>
-          </html>
+</html>
